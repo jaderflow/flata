@@ -1,0 +1,107 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Calculator",
+            "request": "launch",
+            "mainClass": "verimag.flata.Calculator",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "Closure",
+            "request": "launch",
+            "mainClass": "verimag.flata.Closure",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "ConstProp",
+            "request": "launch",
+            "mainClass": "verimag.flata.ConstProp",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "verimag.flata.Main",
+            "args": "-t-fullincl -t-merge-prec -acc-outgoing ./dist/synlifo.correct.nts",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "NonTermCond",
+            "request": "launch",
+            "mainClass": "verimag.flata.NonTermCond",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "Termination",
+            "request": "launch",
+            "mainClass": "verimag.flata.Termination",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "TestGLPK",
+            "request": "launch",
+            "mainClass": "verimag.flata.TestGLPK",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "View",
+            "request": "launch",
+            "mainClass": "verimag.flata.View",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "FoldedZigzag",
+            "request": "launch",
+            "mainClass": "verimag.flata.acceleration.zigzag.FoldedZigzag",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "GSLSet",
+            "request": "launch",
+            "mainClass": "verimag.flata.acceleration.zigzag.GSLSet",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "RecurToKBounded",
+            "request": "launch",
+            "mainClass": "verimag.flata.recur_bounded.RecurToKBounded",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "BackEnd",
+            "request": "launch",
+            "mainClass": "verimag.flata_backend.BackEnd",
+            "args": "./dist/synlifo.correct.nts",
+            "projectName": "flata_2b8e279a"
+        },
+        {
+            "type": "java",
+            "name": "Main(1)",
+            "request": "launch",
+            "mainClass": "verimag.sil.Main",
+            "projectName": "flata_2b8e279a"
+        }
+    ]
+}

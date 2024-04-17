@@ -317,6 +317,17 @@ public class CR {
 				
 				CR.yicesStdinWriter.write(tmp);
 				CR.yicesStdinWriter.flush();
+
+				try {
+					throw new RuntimeException();
+				} catch (Exception e) {
+					System.out.println("yices call #:" + yices_calls); // Assuming yices_calls is defined and updated elsewhere
+					java.io.PrintWriter pw = new java.io.PrintWriter(System.out);
+					System.out.println("expression:\n" + tmp);
+					e.printStackTrace(pw);
+					pw.flush();
+					System.out.println();
+				}
 			}
 			
 			long t2 = System.currentTimeMillis();

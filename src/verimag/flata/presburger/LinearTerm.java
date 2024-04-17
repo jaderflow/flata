@@ -21,6 +21,14 @@ public class LinearTerm implements java.lang.Comparable<LinearTerm> {
 	// (variable==null) => constant term 
 	private final Variable variable; // only shallow copies used
 	private int coeff;
+
+	public int getCoeff() {
+		return coeff;
+	}
+
+	public Variable getVariable() {
+		return variable;
+	}
 	
 	public Variable variable() { return variable; }
 	public int coeff() { return coeff; }

@@ -8,6 +8,7 @@ import nts.parser.*;
 import org.gnu.glpk.*;
 
 import verimag.flata.common.*;
+import verimag.flata.common.smtsolving.JavaSMTWrapper;
 
 /**
  * a <tt>linear constraints</tt> class represents a conjunction objects, each of
@@ -2352,43 +2353,52 @@ new_lr = LinearRel.substituteConstants(aLR);
 
 	private Answer includes_yices(LinearRel other) {
 
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+		JavaSMTWrapper jsw = new JavaSMTWrapper();
+		Boolean isSat = jsw.includesSMT(this, other);
+		// TODO: remove comments, and do further testing
+		// StringWriter sw = new StringWriter();
+		// IndentedWriter iw = new IndentedWriter(sw);
 
-		iw.writeln("(reset)");
+		// iw.writeln("(reset)");
 
-		// define
-		Set<Variable> vars = this.variables();
-		other.refVars(vars);
-		CR.yicesDefineVars(iw, vars);
+		// // define
+		// Set<Variable> vars = this.variables();
+		// other.refVars(vars);
+		// CR.yicesDefineVars(iw, vars);
 
-		iw.writeln("(assert");
-		iw.indentInc();
+		// iw.writeln("(assert");
+		// iw.indentInc();
 
-		// other \subseteq this
-		iw.writeln("(and");
-		iw.indentInc();
-		other.toSBYicesList(iw, false); // not negated
+		// // other \subseteq this
+		// iw.writeln("(and");
+		// iw.indentInc();
+		// other.toSBYicesList(iw, false); // not negated
 
-		iw.writeln("(or");
-		iw.indentInc();
-		this.toSBYicesList(iw, true); // negated
+		// iw.writeln("(or");
+		// iw.indentInc();
+		// this.toSBYicesList(iw, true); // negated
 
-		iw.indentDec();
-		iw.writeln(")"); // or
-		iw.indentDec();
-		iw.writeln(")"); // and
+		// iw.indentDec();
+		// iw.writeln(")"); // or
+		// iw.indentDec();
+		// iw.writeln(")"); // and
 
-		iw.indentDec();
-		iw.writeln(")"); // assert
+		// iw.indentDec();
+		// iw.writeln(")"); // assert
 
-		iw.writeln("(check)");
+		// iw.writeln("(check)");
 
-		StringBuffer yc = new StringBuffer();
-		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
+		// StringBuffer yc = new StringBuffer();
+		// YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 
-		// unsat implies that relation is included
-		return Answer.createFromYicesUnsat(ya);
+		// // unsat implies that relation is included
+		// return Answer.createFromYicesUnsat(ya);
+
+		if (isSat) {
+			return Answer.createAnswer(false);
+		} else {
+			return Answer.createAnswer(true);
+		}
 		
 	}
 	
@@ -2461,8 +2471,14 @@ new_lr = LinearRel.substituteConstants(aLR);
 			
 		} else {
 			
-			StringBuffer yc = new StringBuffer();
-			Answer a = Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc));
+			// StringBuffer yc = new StringBuffer();
+
+			JavaSMTWrapper jsw = new JavaSMTWrapper();
+			Boolean isSat = jsw.toSMTFull(this, false);
+
+			// Answer a = Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc));
+			Answer a = Answer.createAnswer(isSat);
+
 			if (a.isFalse())
 				this.simpleContradiction = true;
 	
