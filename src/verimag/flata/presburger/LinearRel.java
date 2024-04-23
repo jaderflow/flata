@@ -6,9 +6,13 @@ import java.util.*;
 import nts.parser.*;
 
 import org.gnu.glpk.*;
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.SolverContext;
 
 import verimag.flata.common.*;
-import verimag.flata.common.smtsolving.JavaSMTWrapper;
 
 /**
  * a <tt>linear constraints</tt> class represents a conjunction objects, each of
@@ -528,6 +532,32 @@ public class LinearRel extends Relation {
 		return sb;
 	}
 
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, String s_u, String s_p) {
+		return toJSMTList(ifm, false, null, null);
+	}
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm) {
+		return toJSMTList(ifm, false, null, null);
+	}
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, boolean negate) {
+		return toJSMTList(ifm, negate, null, null);
+	}
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, boolean negate, String s_u, String s_p) {
+		ArrayList<BooleanFormula> constraints = new ArrayList<BooleanFormula>(); 
+        
+		for (LinearConstr c : linConstraints_inter) {
+            // TODO: send linear constraint c with functions
+            if (negate) {
+                // Add negation of constraint
+                constraints.add(ifm.greaterThan(c.toJSMT(ifm, s_u, s_p), ifm.makeNumber(0)));
+
+            } else {
+                constraints.add(ifm.lessOrEquals(c.toJSMT(ifm, s_u, s_p), ifm.makeNumber(0)));
+            }
+		}
+        return constraints;
+	}
+
+	// TODO: remove these
 	public void toSBYicesList(IndentedWriter iw, String s_u, String s_p) {
 		toSBYicesList(iw, false, s_u, s_p);
 	}
@@ -552,6 +582,19 @@ public class LinearRel extends Relation {
 		}
 	}
 
+	public BooleanFormula toJSMTFull() {
+		SolverContext context = CR.solver.getContext();
+
+		FormulaManager fm = context.getFormulaManager();
+        IntegerFormulaManager ifm = fm.getIntegerFormulaManager();
+		BooleanFormulaManager bfm = fm.getBooleanFormulaManager();
+
+        // Add constraints
+
+		return toJSMTasConj(ifm, bfm);
+	}
+
+	// TODO: remove this
 	public StringBuffer toSBYicesFull() {
 		StringWriter sw = new StringWriter();
 		IndentedWriter iw = new IndentedWriter(sw);
@@ -577,9 +620,26 @@ public class LinearRel extends Relation {
 		return sw.getBuffer();
 	}
 	
+	public BooleanFormula toJSMTasConj(IntegerFormulaManager ifm, BooleanFormulaManager bfm) {
+		return toJSMTasConj(ifm, bfm, null, null);
+	}
+
+	public BooleanFormula toJSMTasConj(IntegerFormulaManager ifm, BooleanFormulaManager bfm, String s_u, String s_p) {
+		if (this.linConstraints_inter.size() == 0) {
+			// TODO: check if returning true is correct
+			return CR.solver.getContext().getFormulaManager().getBooleanFormulaManager().makeBoolean(true);
+		}
+
+		ArrayList<BooleanFormula> constraints = this.toJSMTList(ifm, s_u, s_p);
+
+		return bfm.and(constraints);
+	}
+
+	// TODO: remove
 	public void toSBYicesAsConj(IndentedWriter aIW) {
 		toSBYicesAsConj(aIW, null, null);
 	}
+	// TODO: remove
 	public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
 		if (this.linConstraints_inter.size() == 0)
 			return;
@@ -2351,55 +2411,63 @@ new_lr = LinearRel.substituteConstants(aLR);
 		return true;
 	}
 
+	private Answer includesJSMT(LinearRel other) {
+		SolverContext context = CR.solver.getContext();
+
+		FormulaManager fm = context.getFormulaManager();
+        IntegerFormulaManager ifm = fm.getIntegerFormulaManager();
+		BooleanFormulaManager bfm = fm.getBooleanFormulaManager();
+
+		ArrayList<BooleanFormula> constraints1 = other.toJSMTList(ifm, false); // toSMTList(ifm, linRel2.toCol(), false);
+
+		ArrayList<BooleanFormula> constraints2 = this.toJSMTList(ifm, true);
+
+		BooleanFormula orConstraint = bfm.or(constraints2);
+
+		constraints1.add(orConstraint);
+        BooleanFormula constraints = bfm.and(constraints1);
+
+		return Answer.createFromInvertedAnswer(CR.solver.isSatisfiable(constraints));
+	}
+
 	private Answer includes_yices(LinearRel other) {
+		StringWriter sw = new StringWriter();
+		IndentedWriter iw = new IndentedWriter(sw);
 
-		JavaSMTWrapper jsw = new JavaSMTWrapper();
-		Boolean isSat = jsw.includesSMT(this, other);
-		// TODO: remove comments, and do further testing
-		// StringWriter sw = new StringWriter();
-		// IndentedWriter iw = new IndentedWriter(sw);
+		iw.writeln("(reset)");
 
-		// iw.writeln("(reset)");
+		// define
+		Set<Variable> vars = this.variables();
+		other.refVars(vars);
+		CR.yicesDefineVars(iw, vars);
 
-		// // define
-		// Set<Variable> vars = this.variables();
-		// other.refVars(vars);
-		// CR.yicesDefineVars(iw, vars);
+		iw.writeln("(assert");
+		iw.indentInc();
 
-		// iw.writeln("(assert");
-		// iw.indentInc();
+		// other \subseteq this
+		iw.writeln("(and");
+		iw.indentInc();
+		other.toSBYicesList(iw, false); // not negated
 
-		// // other \subseteq this
-		// iw.writeln("(and");
-		// iw.indentInc();
-		// other.toSBYicesList(iw, false); // not negated
+		iw.writeln("(or");
+		iw.indentInc();
+		this.toSBYicesList(iw, true); // negated
 
-		// iw.writeln("(or");
-		// iw.indentInc();
-		// this.toSBYicesList(iw, true); // negated
+		iw.indentDec();
+		iw.writeln(")"); // or
+		iw.indentDec();
+		iw.writeln(")"); // and
 
-		// iw.indentDec();
-		// iw.writeln(")"); // or
-		// iw.indentDec();
-		// iw.writeln(")"); // and
+		iw.indentDec();
+		iw.writeln(")"); // assert
 
-		// iw.indentDec();
-		// iw.writeln(")"); // assert
+		iw.writeln("(check)");
 
-		// iw.writeln("(check)");
+		StringBuffer yc = new StringBuffer();
+		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 
-		// StringBuffer yc = new StringBuffer();
-		// YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
-
-		// // unsat implies that relation is included
-		// return Answer.createFromYicesUnsat(ya);
-
-		if (isSat) {
-			return Answer.createAnswer(false);
-		} else {
-			return Answer.createAnswer(true);
-		}
-		
+		// unsat implies that relation is included
+		return Answer.createFromYicesUnsat(ya);
 	}
 	
 	private Answer includes_glpk(LinearRel other) {
@@ -2423,7 +2491,7 @@ new_lr = LinearRel.substituteConstants(aLR);
 			if (INCLUSION_GLPK)
 				return includes_glpk(other);
 			else
-				return includes_yices(other);
+				return includesJSMT(other); // TODO: REMOVE - includes_yices(other);
 		}
 	}
 
@@ -2473,8 +2541,7 @@ new_lr = LinearRel.substituteConstants(aLR);
 			
 			// StringBuffer yc = new StringBuffer();
 
-			JavaSMTWrapper jsw = new JavaSMTWrapper();
-			Boolean isSat = jsw.toSMTFull(this, false);
+			Boolean isSat = CR.solver.isSatisfiable(this.toJSMTFull());
 
 			// Answer a = Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc));
 			Answer a = Answer.createAnswer(isSat);

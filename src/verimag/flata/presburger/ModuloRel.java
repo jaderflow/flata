@@ -3,6 +3,8 @@ package verimag.flata.presburger;
 import java.io.StringWriter;
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;

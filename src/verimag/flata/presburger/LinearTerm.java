@@ -5,6 +5,9 @@ package verimag.flata.presburger;
 
 import java.util.Collection;
 
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+
 import verimag.flata.common.CR;
 
 import nts.parser.*;
@@ -21,15 +24,6 @@ public class LinearTerm implements java.lang.Comparable<LinearTerm> {
 	// (variable==null) => constant term 
 	private final Variable variable; // only shallow copies used
 	private int coeff;
-
-	public int getCoeff() {
-		return coeff;
-	}
-
-	public Variable getVariable() {
-		return variable;
-	}
-	
 	public Variable variable() { return variable; }
 	public int coeff() { return coeff; }
 	public void coeff(int aCoeff) { coeff = aCoeff; }
@@ -145,6 +139,34 @@ public class LinearTerm implements java.lang.Comparable<LinearTerm> {
 
 		return sb;
 	}
+
+	public IntegerFormula toJSMT(IntegerFormulaManager ifm, String s_u, String s_p) {
+		String xx;
+        IntegerFormula coeffFormula = ifm.makeNumber(coeff);
+
+        if (variable == null) {
+            return coeffFormula;
+        } else if (s_u == null) {
+			xx = this.variable.name();
+		} else {
+			if (variable.isPrimed()) {
+				xx = variable.getUnprimedName() + s_p;
+			} else {
+				xx = variable.name() + s_u;
+			}
+		}
+
+        if (variable != null) {
+            xx = "V_" + variable.name();
+            IntegerFormula xxFormula = ifm.makeVariable(xx);
+            return ifm.multiply(coeffFormula, xxFormula);
+        } else {
+            IntegerFormula one = ifm.makeNumber(1);
+            return ifm.multiply(coeffFormula, one);
+        }
+	}
+
+	// TODO: remove this
 	// if s_u == null, standard priming is used, otherwise, given suffixes are used
 	public StringBuffer toSBYices(String s_u, String s_p) {
 		StringBuffer sb = new StringBuffer();

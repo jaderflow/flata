@@ -18,6 +18,8 @@ import yices.*;
  * members.
  */
 public class CR {
+	public static JavaSMTSolver solver;
+
 	public static boolean RELEASE = true;
 	
 	public static boolean NO_POSTPARSING = false;
@@ -452,6 +454,7 @@ public class CR {
 	}
 	
 	public static void launchYices() {
+		solver = new JavaSMTSolver(); // TODO: remove Yices and rename function to launchJavaSMTContext
 		try {
 		if (yicesLite)
 			launchYicesN();
