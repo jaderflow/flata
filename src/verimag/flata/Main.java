@@ -311,6 +311,9 @@ public class Main {
 		}
 		
 		Main.finalActions();
+
+		// System.out.println(CR.solver.getSolverCalls() + ", " + CR.yices_calls);
+
 		System.exit(0);
 	}
 	

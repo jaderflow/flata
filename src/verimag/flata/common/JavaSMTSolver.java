@@ -25,6 +25,11 @@ public class JavaSMTSolver {
     private ShutdownNotifier notifier;
     private LogManager logger;
     private SolverContext context;
+    private IntegerFormulaManager ifm;
+    private BooleanFormulaManager bfm;
+    private QuantifiedFormulaManager qfm;
+
+    private int solverCalls;
 
     // TODO: Add options for smt solving
     public JavaSMTSolver() {
@@ -34,6 +39,11 @@ public class JavaSMTSolver {
             logger = BasicLogManager.create(config);
             context = null;
             context = SolverContextFactory.createSolverContext(config, logger, notifier, Solvers.Z3);
+            ifm = context.getFormulaManager().getIntegerFormulaManager();
+            bfm = context.getFormulaManager().getBooleanFormulaManager();
+            qfm = context.getFormulaManager().getQuantifiedFormulaManager();
+
+            solverCalls = 0;
         } catch (Exception e) {
             e.printStackTrace();
             // Handle other exceptions if necessary
@@ -44,7 +54,24 @@ public class JavaSMTSolver {
         return context;
     }
 
+    public IntegerFormulaManager getIfm() {
+        return ifm;
+    }
+
+    public BooleanFormulaManager getBfm() {
+        return bfm;
+    }
+
+    public QuantifiedFormulaManager getQfm() {
+        return qfm;
+    }
+
+    public int getSolverCalls() {
+        return solverCalls;
+    }
+
     public Boolean isSatisfiable (BooleanFormula constraints) {
+        solverCalls++;
         Boolean isSatisfiable = false;
         try (ProverEnvironment prover = context.newProverEnvironment(ProverOptions.GENERATE_MODELS)) {
             prover.addConstraint(constraints);

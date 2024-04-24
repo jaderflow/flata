@@ -1,9 +1,13 @@
 package verimag.flata.presburger;
 
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.*;
 
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
@@ -715,6 +719,47 @@ public class ModuloRel extends Relation {
 
 	public Answer includes(Relation otherRel) {
 		if (!(otherRel instanceof ModuloRel)) {
+			return Relation.includes(this, otherRel);
+		} else {
+			ModuloRel other = (ModuloRel) otherRel;
+
+			{
+				if (this.modConstrs.includesForSure(other.modConstrs)
+						&& this.linConstrs.includes(other.linConstrs).isTrue()) {
+					return Answer.TRUE;
+				}
+			}
+
+			IntegerFormulaManager ifm = CR.solver.getIfm();
+			BooleanFormulaManager bfm = CR.solver.getBfm();
+			QuantifiedFormulaManager qfm = CR.solver.getQfm();
+
+			ArrayList<BooleanFormula> otherConstr1 = other.linConstrs.toJSMTList(ifm, false);
+			ArrayList<BooleanFormula> otherConstr2 = other.modConstrs.toJSMTList(ifm, bfm, qfm, false);
+
+			// Combine the constraints
+			ArrayList<BooleanFormula> otherConstrs = new ArrayList<BooleanFormula>();
+			otherConstrs.addAll(otherConstr1);
+			otherConstrs.addAll(otherConstr2);
+
+			ArrayList<BooleanFormula> thisConstr1 = this.linConstrs.toJSMTList(ifm, true);
+			ArrayList<BooleanFormula> thisConstr2 = this.modConstrs.toJSMTList(ifm, bfm, qfm, true);
+
+			ArrayList<BooleanFormula> thisConstrs = new ArrayList<BooleanFormula>();
+			thisConstrs.addAll(thisConstr1);
+			thisConstrs.addAll(thisConstr2);
+
+			BooleanFormula orConstr = bfm.or(thisConstrs);
+
+			BooleanFormula andConstr = bfm.and(otherConstrs);
+
+			return Answer.createAnswer(CR.solver.isSatisfiable(bfm.and(andConstr, orConstr)));
+		}
+	}
+
+	// TODO: remove this
+	public Answer includes2(Relation otherRel) {
+		if (!(otherRel instanceof ModuloRel)) {
 
 			return Relation.includes(this, otherRel);
 		} else {
@@ -837,8 +882,11 @@ public class ModuloRel extends Relation {
 		if (modConstrs.simpleContradiction() || linConstrs.simpleContradiction())
 			return Answer.FALSE;
 		
-		StringBuffer yc = new StringBuffer();
-		return Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc));
+		// StringBuffer yc = new StringBuffer(); // TODO: remove this
+
+		return Answer.createAnswer(CR.solver.isSatisfiable(this.toJSMTFull()));
+
+		// return Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc)); // TODO: remove this
 	}
 
 	public DBRel toDBRel() {
@@ -875,6 +923,22 @@ public class ModuloRel extends Relation {
 //			return this;
 //		} else
 //			return this.copy();
+	}
+
+	public BooleanFormula toJSMTFull() {
+		IntegerFormulaManager ifm = CR.solver.getIfm();
+		BooleanFormulaManager bfm = CR.solver.getBfm();
+		QuantifiedFormulaManager qfm = CR.solver.getQfm();
+		
+		ArrayList<BooleanFormula> constraints1 = this.linConstrs.toJSMTList(ifm);
+		
+		ArrayList<BooleanFormula> constraints2 = this.modConstrs.toJSMTList(ifm, bfm, qfm);
+
+		constraints1.addAll(constraints2); // TODO: check if correct
+
+		String tmp = constraints1.toString();
+
+		return bfm.and(constraints1);
 	}
 
 	public StringBuffer toSBYicesFull() {

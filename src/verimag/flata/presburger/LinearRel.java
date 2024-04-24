@@ -583,13 +583,8 @@ public class LinearRel extends Relation {
 	}
 
 	public BooleanFormula toJSMTFull() {
-		SolverContext context = CR.solver.getContext();
-
-		FormulaManager fm = context.getFormulaManager();
-        IntegerFormulaManager ifm = fm.getIntegerFormulaManager();
-		BooleanFormulaManager bfm = fm.getBooleanFormulaManager();
-
-        // Add constraints
+		IntegerFormulaManager ifm = CR.solver.getIfm();
+		BooleanFormulaManager bfm = CR.solver.getBfm();
 
 		return toJSMTasConj(ifm, bfm);
 	}
@@ -627,7 +622,7 @@ public class LinearRel extends Relation {
 	public BooleanFormula toJSMTasConj(IntegerFormulaManager ifm, BooleanFormulaManager bfm, String s_u, String s_p) {
 		if (this.linConstraints_inter.size() == 0) {
 			// TODO: check if returning true is correct
-			return CR.solver.getContext().getFormulaManager().getBooleanFormulaManager().makeBoolean(true);
+			return bfm.makeBoolean(true);
 		}
 
 		ArrayList<BooleanFormula> constraints = this.toJSMTList(ifm, s_u, s_p);
@@ -2412,11 +2407,8 @@ new_lr = LinearRel.substituteConstants(aLR);
 	}
 
 	private Answer includesJSMT(LinearRel other) {
-		SolverContext context = CR.solver.getContext();
-
-		FormulaManager fm = context.getFormulaManager();
-        IntegerFormulaManager ifm = fm.getIntegerFormulaManager();
-		BooleanFormulaManager bfm = fm.getBooleanFormulaManager();
+        IntegerFormulaManager ifm = CR.solver.getIfm();
+		BooleanFormulaManager bfm = CR.solver.getBfm();
 
 		ArrayList<BooleanFormula> constraints1 = other.toJSMTList(ifm, false); // toSMTList(ifm, linRel2.toCol(), false);
 
@@ -2488,10 +2480,13 @@ new_lr = LinearRel.substituteConstants(aLR);
 				return Answer.TRUE;
 			}
 			
-			if (INCLUSION_GLPK)
+			if (INCLUSION_GLPK) {
 				return includes_glpk(other);
-			else
-				return includesJSMT(other); // TODO: REMOVE - includes_yices(other);
+			}
+			else {
+				return includesJSMT(other); 
+				// return includes_yices(other); // TODO: remove this
+			}
 		}
 	}
 
@@ -2539,11 +2534,11 @@ new_lr = LinearRel.substituteConstants(aLR);
 			
 		} else {
 			
-			// StringBuffer yc = new StringBuffer();
+			// StringBuffer yc = new StringBuffer(); // TODO: remove this
 
 			Boolean isSat = CR.solver.isSatisfiable(this.toJSMTFull());
 
-			// Answer a = Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc));
+			// Answer a = Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc)); // TODO: remove this
 			Answer a = Answer.createAnswer(isSat);
 
 			if (a.isFalse())

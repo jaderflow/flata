@@ -2,6 +2,13 @@ package verimag.flata.presburger;
 
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
+
+import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
 
 
@@ -152,6 +159,29 @@ public class ModuloConstr implements Constr {
 		return ""+modulus+"|"+LinearTerm.toSBtermList(constr.values());
 	}
 	
+	// TODO: maybe only send JSMTsolver, and call get functions for FormulaManagers???
+	public BooleanFormula toJSMTListPart(IntegerFormulaManager ifm, BooleanFormulaManager bfm, 
+										 QuantifiedFormulaManager qfm, boolean negate, String s_u, String s_p) {
+		IntegerFormula param = ifm.makeVariable(param_name);
+		BooleanFormula finalFormula = null;
+		if (!negate) {
+			IntegerFormula expr = ifm.multiply(ifm.makeNumber(modulus), param);
+			IntegerFormula constraints = constr.toJSMT(ifm, s_u, s_p);
+			BooleanFormula formula = ifm.equal(constraints, expr);
+			finalFormula = qfm.exists(param, formula);
+		} else {
+			ArrayList<BooleanFormula> formulas = new ArrayList<>();
+			for (int i = 1; i < modulus; i++) {
+				IntegerFormula expr = ifm.add(ifm.multiply(ifm.makeNumber(modulus), param), ifm.makeNumber(i));
+				BooleanFormula formula = ifm.equal(constr.toJSMT(ifm, s_u, s_p), expr);
+                formula = qfm.exists(param, formula);
+				formulas.add(formula);
+			}
+			finalFormula = bfm.and(formulas); // TODO: check if this is in fact the correct way to do it
+		}
+		return finalFormula;
+	}
+
 	public void toSBYicesListPart(IndentedWriter iw, boolean negate, String s_u, String s_p) {
 		
 		if (!negate) {

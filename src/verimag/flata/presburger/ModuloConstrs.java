@@ -2,6 +2,11 @@ package verimag.flata.presburger;
 
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
+
 import verimag.flata.common.Answer;
 import verimag.flata.common.IndentedWriter;
 
@@ -82,7 +87,33 @@ public class ModuloConstrs {
 		}
 		return sb.toString();
 	}
-	
+
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, BooleanFormulaManager bfm, QuantifiedFormulaManager qfm, String s_u, String s_p) {
+		return toJSMTList(ifm, bfm, qfm, false, null, null);
+	}
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, BooleanFormulaManager bfm, QuantifiedFormulaManager qfm) {
+		return toJSMTList(ifm, bfm, qfm, false, null, null);
+	}
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, BooleanFormulaManager bfm, QuantifiedFormulaManager qfm, boolean negate) {
+		return toJSMTList(ifm, bfm, qfm, negate, null, null);
+	}
+	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, BooleanFormulaManager bfm, QuantifiedFormulaManager qfm, boolean negate, String s_u, String s_p) {
+		
+		ArrayList<BooleanFormula> constraints = new ArrayList<BooleanFormula>(); 
+		
+		if (this.simpleContradiction) {
+			constraints.add(bfm.makeBoolean(negate));
+			return constraints;
+		}
+		
+        for (ModuloConstr mc : modConstrs_inter) {
+			constraints.add(mc.toJSMTListPart(ifm, bfm, qfm, negate, s_u, s_p)); // TODO: is check for successful add required??
+		}
+		
+		return constraints;
+	}
+
+	// TODO: remove these
 	public void toSBYicesList(IndentedWriter iw, String s_u, String s_p) {
 		toSBYicesList(iw,false,s_u,s_p);
 	}
