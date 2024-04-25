@@ -2,10 +2,13 @@ package verimag.flata.presburger;
 
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+
 import verimag.flata.acceleration.zigzag.flataofpca.ZigzagClosure;
 import verimag.flata.acceleration.delta.DeltaClosure;
 import verimag.flata.common.Answer;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 
 public abstract class Relation extends RelationCommon {
 	
@@ -128,6 +131,11 @@ public abstract class Relation extends RelationCommon {
 	public abstract ModuloRel toModuloRel();
 //	public abstract ModExistsRel toModExists();
 	
+
+	public abstract BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p);
+	public abstract ArrayList<BooleanFormula>  toJSMTList(JavaSMTSolver jsmt, boolean negate);
+
+	// TODO: remove these
 	// produces a conjunction of constraints
 	public abstract void toSBYicesAsConj(IndentedWriter aIW);
 	// same as above, just no primes are used:

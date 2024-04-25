@@ -9,7 +9,7 @@ import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 
 import verimag.flata.common.CR;
-
+import verimag.flata.common.JavaSMTSolver;
 import nts.parser.*;
 
 
@@ -140,26 +140,28 @@ public class LinearTerm implements java.lang.Comparable<LinearTerm> {
 		return sb;
 	}
 
-	public IntegerFormula toJSMT(IntegerFormulaManager ifm, String s_u, String s_p) {
-		String xx;
+	public IntegerFormula toJSMT(JavaSMTSolver jsmt, String s_u, String s_p) {
+		IntegerFormulaManager ifm = jsmt.getIfm();
+
+		String varName;
         IntegerFormula coeffFormula = ifm.makeNumber(coeff);
 
         if (variable == null) {
             return coeffFormula;
         } else if (s_u == null) {
-			xx = this.variable.name();
+			varName = this.variable.name();
 		} else {
 			if (variable.isPrimed()) {
-				xx = variable.getUnprimedName() + s_p;
+				varName = variable.getUnprimedName() + s_p;
 			} else {
-				xx = variable.name() + s_u;
+				varName = variable.name() + s_u;
 			}
 		}
 
         if (variable != null) {
-            xx = "V_" + variable.name();
-            IntegerFormula xxFormula = ifm.makeVariable(xx);
-            return ifm.multiply(coeffFormula, xxFormula);
+            varName = "V_" + variable.name();
+            IntegerFormula varFormula = ifm.makeVariable(varName);
+            return ifm.multiply(coeffFormula, varFormula);
         } else {
             IntegerFormula one = ifm.makeNumber(1);
             return ifm.multiply(coeffFormula, one);

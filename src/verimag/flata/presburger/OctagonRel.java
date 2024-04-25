@@ -2,10 +2,13 @@ package verimag.flata.presburger;
 
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+
 import verimag.flata.acceleration.delta.DeltaClosure;
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 
 public class OctagonRel extends Relation implements DBOct {
 	
@@ -484,7 +487,23 @@ public class OctagonRel extends Relation implements DBOct {
 	public String toString() {
 		return toStringBuf().toString();
 	}
+
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
+		return toJSMTAsConj(jsmt, null, null);
+	}
+
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
+		ArrayList<BooleanFormula> constraints = dbm.toJSMTList_oct(jsmt, varsOrig, s_u, s_p, false);
+
+		return jsmt.getBfm().and(constraints);
+	}
+
+	public ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, boolean negate) {
+		return dbm.toJSMTList_oct(jsmt, varsOrig, null, null, negate);
+	}
 	
+
+	// TODO: remove
 	public void toSBYicesAsConj(IndentedWriter aIW, String s_u, String s_p) {
 		CR.yicesAndStart(aIW);
 		dbm.toStringBufYicesList_oct(aIW, varsOrig, s_u, s_p, false);

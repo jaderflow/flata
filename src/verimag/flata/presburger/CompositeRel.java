@@ -3,6 +3,9 @@ package verimag.flata.presburger;
 import java.io.StringWriter;
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+
 import nts.parser.*;
 import verimag.flata.acceleration.delta.DeltaClosure;
 import verimag.flata.common.*;
@@ -1585,6 +1588,22 @@ public class CompositeRel extends RelationCommon implements Label {
 		return false;
 	}
 
+	BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
+		return toJSMTAsConj(jsmt, null, null);
+	}
+
+	BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
+		ArrayList<BooleanFormula> constraints = new ArrayList<>();
+
+		for (Relation r : this.rels) {
+			constraints.add(r.toJSMTAsConj(jsmt, s_u, s_p));
+		}
+
+		return jsmt.getBfm().and(constraints);
+	}
+
+
+	//TODO: remove
 	@Override
 	public void toSBYicesAsConj(IndentedWriter iw) {
 		toSBYicesAsConj(iw, null, null);
@@ -1601,7 +1620,16 @@ public class CompositeRel extends RelationCommon implements Label {
 		iw.indentDec();
 		iw.writeln(")");
 	}
-	
+
+	public ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, boolean negate) {
+		ArrayList<BooleanFormula> constraints = new ArrayList<>();
+		for (Relation r : this.rels) {
+			constraints.addAll(r.toJSMTList(jsmt, negate));
+		}
+		return constraints;
+	}
+
+	//TODO: remove
 	public void toSBYicesList(IndentedWriter iw, boolean negate) {
 		for (Relation r : this.rels)
 			r.toSBYicesList(iw, negate);
@@ -1888,8 +1916,28 @@ public class CompositeRel extends RelationCommon implements Label {
 	// not R \/ R1 \/ ... \/ Rn valid
 	// not (not R \/ R1 \/ ... \/ Rn) unsatisfiable
 	// R /\ not R1 /\ ... /\ not Rn unsatisfiable
-	
+
+	// TODO: remove vars, as they are not needed
 	public static Answer subsumed(Collection<String> vars, CompositeRel r, Collection<CompositeRel> rels) {
+		if (rels.isEmpty()) {
+			return Answer.FALSE;
+		}
+
+		JavaSMTSolver jsmt = CR.solver;
+		BooleanFormulaManager bfm = jsmt.getBfm();
+
+		ArrayList<BooleanFormula> constraints = r.toJSMTList(jsmt, false);
+
+		for (CompositeRel rr : rels) {
+			constraints.add(bfm.or(rr.toJSMTList(jsmt, true)));
+		}
+
+		BooleanFormula formula = bfm.and(constraints);
+
+		return Answer.createInvertedAnswer(jsmt.isSatisfiable(formula));
+	}
+	
+	public static Answer subsumedOLD(Collection<String> vars, CompositeRel r, Collection<CompositeRel> rels) {
 		
 		if (rels.isEmpty())
 			return Answer.FALSE;

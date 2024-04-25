@@ -1,12 +1,20 @@
 package verimag.flata.presburger;
 
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
+
+import ap.parser.ApInput.Absyn.Quant;
 import verimag.flata.Closure;
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 import verimag.flata.common.YicesAnswer;
 import nts.parser.*;
 
@@ -479,7 +487,56 @@ public class DisjRel {
 			return this.implies(other).and(other.implies(this));
 		}
 	}
+
+	// TODO: check if this is correct
 	public Answer implies(DisjRel other) {
+		if (this.disjuncts.size() == 0 && other.disjuncts.size() == 0) {
+			return Answer.FALSE;
+		} else if (other.disjuncts.size() > 0 && other.disjuncts.iterator().next().isTrue()) {
+			return Answer.TRUE;
+		} else {
+			JavaSMTSolver jsmt = CR.solver;
+
+			BooleanFormulaManager bfm = jsmt.getBfm();
+
+			BooleanFormula formula1 = null; // first or
+			BooleanFormula formula2 = null; // second or
+
+			if (disjuncts.size() == 0) {
+				//iw.writeln("false");
+				formula1 = bfm.makeFalse();
+			} else {
+				ArrayList<BooleanFormula> conjuncts = new ArrayList<BooleanFormula>();
+				for (CompositeRel r : this.disjuncts) {
+					//r.toModuloRel().toSBYicesAsConj(iw);
+					conjuncts.add(r.toModuloRel().toJSMTAsConj(jsmt, null, null));
+				}
+				formula1 = bfm.or(conjuncts);
+			}
+
+			if (other.disjuncts.size() == 0) {
+				//iw.writeln("false");
+				formula2 = bfm.makeFalse();
+			} else {
+				ArrayList<BooleanFormula> conjuncts = new ArrayList<BooleanFormula>();
+				for (CompositeRel r : other.disjuncts) {
+					//r.toModuloRel().toSBYicesAsConj(iw);
+					conjuncts.add(r.toModuloRel().toJSMTAsConj(jsmt, null, null));
+				}
+			}
+
+			// formula1 => formula2
+			BooleanFormula implication = bfm.implication(formula1, formula2);
+
+			// not (formula1 => formula2)
+			BooleanFormula notImplication = bfm.not(implication);
+
+			return Answer.createInvertedAnswer(CR.solver.isSatisfiable(notImplication)); // TODO: check if this is correct
+		}
+	}
+
+	// TODO: remove this
+	public Answer impliesOLD(DisjRel other) {
 		if (this.disjuncts.size() == 0 && other.disjuncts.size() == 0) {
 			return Answer.FALSE;
 		} else if (other.disjuncts.size() > 0 && other.disjuncts.iterator().next().isTrue()) {

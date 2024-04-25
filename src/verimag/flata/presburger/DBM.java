@@ -2,8 +2,14 @@ package verimag.flata.presburger;
 
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 
 public class DBM {
 	
@@ -1286,6 +1292,57 @@ public class DBM {
 			return sb;
 		}
 
+		public BooleanFormula toJSMT(JavaSMTSolver jsmt, String s_u, String s_p, boolean negate) {
+			LinearTerm bndTerm = new LinearTerm(null, bound);
+
+			IntegerFormulaManager ifm = jsmt.getIfm();
+			BooleanFormulaManager bfm = jsmt.getBfm();
+			
+			IntegerFormula constrBnd = bndTerm.toJSMT(jsmt, s_u, s_p);
+			
+			if (lt1 != null && lt2 != null) {
+				IntegerFormula constrLt1 = lt1.toJSMT(jsmt, s_u, s_p);
+				IntegerFormula constrLt2 = lt2.toJSMT(jsmt, s_u, s_p);
+
+				IntegerFormula addition = ifm.add(constrLt1, constrLt2);
+				if (isEq) {
+					if (negate) {
+						return bfm.not(ifm.equal(addition, constrBnd)); // TODO: check if this is correct
+					} else {
+						return ifm.equal(addition, constrBnd);
+					}
+				} else {
+					if (negate) {
+						return ifm.greaterThan(addition, constrBnd);
+					} else {
+						return ifm.lessOrEquals(addition, constrBnd);
+					}
+				}
+			} else {
+				IntegerFormula constrLt = null;
+				if (lt1 == null) {
+					constrLt = lt2.toJSMT(jsmt, s_u, s_p);
+				} else {
+					constrLt = lt1.toJSMT(jsmt, s_u, s_p);
+				}
+
+				if (isEq) {
+					if (negate) {
+						return bfm.not(ifm.equal(constrLt, constrBnd)); // TODO: check if this is correct
+					} else {
+						return ifm.equal(constrLt, constrBnd);
+					}
+				} else {
+					if (negate) {
+						return ifm.greaterThan(constrLt, constrBnd);
+					} else {
+						return ifm.lessOrEquals(constrLt, constrBnd);
+					}
+				}
+			}
+		}
+
+		// TODO: remove
 		public void toStringBufYices(IndentedWriter iw, String s_u, String s_p, boolean negate) {
 			
 			LinearTerm bndTerm = new LinearTerm(null,bound);
@@ -1301,6 +1358,18 @@ public class DBM {
 			}
 			
 		}
+
+		public static ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, Collection<OctConstrLeqEq> aCol, String suf_unp, String suf_p, boolean negate) {
+			ArrayList<BooleanFormula> constraints = new ArrayList<>();
+			
+			for (OctConstrLeqEq oc : aCol) {
+				constraints.add(oc.toJSMT(jsmt, suf_unp, suf_p, negate));
+			}
+
+			return constraints;
+		}
+
+		// TODO: remove
 		public static void toStringBufYicesList(IndentedWriter iw, Collection<OctConstrLeqEq> aCol, String suf_unp, String suf_p, boolean negate) {
 			for (OctConstrLeqEq oc : aCol) {
 				oc.toStringBufYices(iw, suf_unp, suf_p, negate);
@@ -1332,6 +1401,12 @@ public class DBM {
 		OctConstrLeqEq.toStringBufYicesList(iw, col, suf_unp, suf_p, negate);
 	}
 
+	public ArrayList<BooleanFormula> toJSMTList_oct(JavaSMTSolver jsmt, Variable[] vars, String suf_unp, String suf_p, boolean negate) {
+		Collection<OctConstrLeqEq> col = octMat2OctConstrsLeqEq(vars);
+		return OctConstrLeqEq.toJSMTList(jsmt, col, suf_unp, suf_p, negate);
+	}
+
+	//TODO: remove
 	public void toStringBufYicesList_oct(IndentedWriter iw, Variable[] vars, String suf_unp, String suf_p, boolean negate) {
 		Collection<OctConstrLeqEq> col;
 		col = octMat2OctConstrsLeqEq(vars);

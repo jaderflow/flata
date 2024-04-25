@@ -10,6 +10,7 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 
 
 public class ModuloConstr implements Constr {
@@ -160,20 +161,23 @@ public class ModuloConstr implements Constr {
 	}
 	
 	// TODO: maybe only send JSMTsolver, and call get functions for FormulaManagers???
-	public BooleanFormula toJSMTListPart(IntegerFormulaManager ifm, BooleanFormulaManager bfm, 
-										 QuantifiedFormulaManager qfm, boolean negate, String s_u, String s_p) {
+	public BooleanFormula toJSMTListPart(JavaSMTSolver jsmt, boolean negate, String s_u, String s_p) {
+		IntegerFormulaManager ifm = jsmt.getIfm();
+		BooleanFormulaManager bfm = jsmt.getBfm();
+		QuantifiedFormulaManager qfm = jsmt.getQfm();
+
 		IntegerFormula param = ifm.makeVariable(param_name);
 		BooleanFormula finalFormula = null;
 		if (!negate) {
 			IntegerFormula expr = ifm.multiply(ifm.makeNumber(modulus), param);
-			IntegerFormula constraints = constr.toJSMT(ifm, s_u, s_p);
+			IntegerFormula constraints = constr.toJSMT(jsmt, s_u, s_p);
 			BooleanFormula formula = ifm.equal(constraints, expr);
 			finalFormula = qfm.exists(param, formula);
 		} else {
 			ArrayList<BooleanFormula> formulas = new ArrayList<>();
 			for (int i = 1; i < modulus; i++) {
 				IntegerFormula expr = ifm.add(ifm.multiply(ifm.makeNumber(modulus), param), ifm.makeNumber(i));
-				BooleanFormula formula = ifm.equal(constr.toJSMT(ifm, s_u, s_p), expr);
+				BooleanFormula formula = ifm.equal(constr.toJSMT(jsmt, s_u, s_p), expr);
                 formula = qfm.exists(param, formula);
 				formulas.add(formula);
 			}

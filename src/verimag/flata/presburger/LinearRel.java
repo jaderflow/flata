@@ -532,26 +532,28 @@ public class LinearRel extends Relation {
 		return sb;
 	}
 
-	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, String s_u, String s_p) {
-		return toJSMTList(ifm, false, null, null);
+	public ArrayList<BooleanFormula>  toJSMTList(JavaSMTSolver jsmt, String s_u, String s_p) {
+		return toJSMTList(jsmt, false, null, null);
 	}
-	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm) {
-		return toJSMTList(ifm, false, null, null);
+	public ArrayList<BooleanFormula>  toJSMTList(JavaSMTSolver jsmt) {
+		return toJSMTList(jsmt, false, null, null);
 	}
-	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, boolean negate) {
-		return toJSMTList(ifm, negate, null, null);
+	public ArrayList<BooleanFormula>  toJSMTList(JavaSMTSolver jsmt, boolean negate) {
+		return toJSMTList(jsmt, negate, null, null);
 	}
-	public ArrayList<BooleanFormula>  toJSMTList(IntegerFormulaManager ifm, boolean negate, String s_u, String s_p) {
+	public ArrayList<BooleanFormula>  toJSMTList(JavaSMTSolver jsmt, boolean negate, String s_u, String s_p) {
 		ArrayList<BooleanFormula> constraints = new ArrayList<BooleanFormula>(); 
+
+		IntegerFormulaManager ifm = jsmt.getIfm();
         
 		for (LinearConstr c : linConstraints_inter) {
             // TODO: send linear constraint c with functions
             if (negate) {
                 // Add negation of constraint
-                constraints.add(ifm.greaterThan(c.toJSMT(ifm, s_u, s_p), ifm.makeNumber(0)));
+                constraints.add(ifm.greaterThan(c.toJSMT(jsmt, s_u, s_p), ifm.makeNumber(0)));
 
             } else {
-                constraints.add(ifm.lessOrEquals(c.toJSMT(ifm, s_u, s_p), ifm.makeNumber(0)));
+                constraints.add(ifm.lessOrEquals(c.toJSMT(jsmt, s_u, s_p), ifm.makeNumber(0)));
             }
 		}
         return constraints;
@@ -583,10 +585,7 @@ public class LinearRel extends Relation {
 	}
 
 	public BooleanFormula toJSMTFull() {
-		IntegerFormulaManager ifm = CR.solver.getIfm();
-		BooleanFormulaManager bfm = CR.solver.getBfm();
-
-		return toJSMTasConj(ifm, bfm);
+		return toJSMTAsConj(CR.solver);
 	}
 
 	// TODO: remove this
@@ -615,17 +614,19 @@ public class LinearRel extends Relation {
 		return sw.getBuffer();
 	}
 	
-	public BooleanFormula toJSMTasConj(IntegerFormulaManager ifm, BooleanFormulaManager bfm) {
-		return toJSMTasConj(ifm, bfm, null, null);
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
+		return toJSMTAsConj(jsmt, null, null);
 	}
 
-	public BooleanFormula toJSMTasConj(IntegerFormulaManager ifm, BooleanFormulaManager bfm, String s_u, String s_p) {
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
+		BooleanFormulaManager bfm = jsmt.getBfm();
+
 		if (this.linConstraints_inter.size() == 0) {
 			// TODO: check if returning true is correct
-			return bfm.makeBoolean(true);
+			return bfm.makeTrue();
 		}
 
-		ArrayList<BooleanFormula> constraints = this.toJSMTList(ifm, s_u, s_p);
+		ArrayList<BooleanFormula> constraints = this.toJSMTList(jsmt, s_u, s_p);
 
 		return bfm.and(constraints);
 	}
@@ -2407,19 +2408,19 @@ new_lr = LinearRel.substituteConstants(aLR);
 	}
 
 	private Answer includesJSMT(LinearRel other) {
-        IntegerFormulaManager ifm = CR.solver.getIfm();
-		BooleanFormulaManager bfm = CR.solver.getBfm();
+		JavaSMTSolver jsmt = CR.solver;
+		BooleanFormulaManager bfm = jsmt.getBfm();
 
-		ArrayList<BooleanFormula> constraints1 = other.toJSMTList(ifm, false); // toSMTList(ifm, linRel2.toCol(), false);
+		ArrayList<BooleanFormula> constraints1 = other.toJSMTList(jsmt, false); // toSMTList(ifm, linRel2.toCol(), false);
 
-		ArrayList<BooleanFormula> constraints2 = this.toJSMTList(ifm, true);
+		ArrayList<BooleanFormula> constraints2 = this.toJSMTList(jsmt, true);
 
 		BooleanFormula orConstraint = bfm.or(constraints2);
 
 		constraints1.add(orConstraint);
         BooleanFormula constraints = bfm.and(constraints1);
 
-		return Answer.createFromInvertedAnswer(CR.solver.isSatisfiable(constraints));
+		return Answer.createInvertedAnswer(CR.solver.isSatisfiable(constraints));
 	}
 
 	private Answer includes_yices(LinearRel other) {

@@ -12,6 +12,7 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 import verimag.flata.common.YicesAnswer;
 
 public class ModuloRel extends Relation {
@@ -137,7 +138,44 @@ public class ModuloRel extends Relation {
 		return "" + linConstrs.toSBClever(Variable.ePRINT_prime) 
 		+ ((modConstrs.size() == 0)? "" : ", ") + modConstrs;
 	}
+
+	public void toJSMTAsConj(JavaSMTSolver jsmt) {
+		toJSMTAsConj(jsmt, null, null);
+	}
+
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
+		int lsize = linConstrs.size();
+		int msize = modConstrs.size();
+
+		BooleanFormula formula = jsmt.getBfm().makeTrue();
+
+		if (lsize + msize > 0) {
+			ArrayList<BooleanFormula> constraints = new ArrayList<BooleanFormula>();
+
+			if (lsize > 0) {
+				constraints.addAll(linConstrs.toJSMTList(jsmt, s_u, s_p));
+			}
+			if (msize > 0) {
+				constraints.addAll(modConstrs.toJSMTList(jsmt, s_u, s_p));
+			}
+
+			formula = jsmt.getBfm().and(constraints);
+		}
+
+		return formula;
+	}
+
+	public ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, boolean negate) {
+		ArrayList<BooleanFormula> constraints = new ArrayList<BooleanFormula>();
+
+		constraints.addAll(this.linConstrs.toJSMTList(jsmt, negate));
+		constraints.addAll(this.modConstrs.toJSMTList(jsmt, negate));
+
+		return constraints;
+	}
 	
+
+	// TODO: remove these
 	public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
 		int lsize = linConstrs.size();
 		int msize = modConstrs.size();
@@ -163,6 +201,7 @@ public class ModuloRel extends Relation {
 		toSBYicesAsConj(aIW, null, null);
 	}
 	
+	// TODO: find what uses this, remove
 	public void toSBYicesList(IndentedWriter iw, boolean negate) {
 		this.linConstrs.toSBYicesList(iw, negate);
 		this.modConstrs.toSBYicesList(iw, negate);
@@ -730,30 +769,29 @@ public class ModuloRel extends Relation {
 				}
 			}
 
-			IntegerFormulaManager ifm = CR.solver.getIfm();
-			BooleanFormulaManager bfm = CR.solver.getBfm();
-			QuantifiedFormulaManager qfm = CR.solver.getQfm();
-
-			ArrayList<BooleanFormula> otherConstr1 = other.linConstrs.toJSMTList(ifm, false);
-			ArrayList<BooleanFormula> otherConstr2 = other.modConstrs.toJSMTList(ifm, bfm, qfm, false);
-
+			JavaSMTSolver jsmt = CR.solver;
+			
+			ArrayList<BooleanFormula> otherConstr1 = other.linConstrs.toJSMTList(jsmt, false);
+			ArrayList<BooleanFormula> otherConstr2 = other.modConstrs.toJSMTList(jsmt, false);
+			
 			// Combine the constraints
 			ArrayList<BooleanFormula> otherConstrs = new ArrayList<BooleanFormula>();
 			otherConstrs.addAll(otherConstr1);
 			otherConstrs.addAll(otherConstr2);
-
-			ArrayList<BooleanFormula> thisConstr1 = this.linConstrs.toJSMTList(ifm, true);
-			ArrayList<BooleanFormula> thisConstr2 = this.modConstrs.toJSMTList(ifm, bfm, qfm, true);
-
+			
+			ArrayList<BooleanFormula> thisConstr1 = this.linConstrs.toJSMTList(jsmt, true);
+			ArrayList<BooleanFormula> thisConstr2 = this.modConstrs.toJSMTList(jsmt, true);
+			
 			ArrayList<BooleanFormula> thisConstrs = new ArrayList<BooleanFormula>();
 			thisConstrs.addAll(thisConstr1);
 			thisConstrs.addAll(thisConstr2);
-
+			
+			BooleanFormulaManager bfm = CR.solver.getBfm();
+			
 			BooleanFormula orConstr = bfm.or(thisConstrs);
-
 			BooleanFormula andConstr = bfm.and(otherConstrs);
 
-			return Answer.createAnswer(CR.solver.isSatisfiable(bfm.and(andConstr, orConstr)));
+			return Answer.createInvertedAnswer(CR.solver.isSatisfiable(bfm.and(andConstr, orConstr)));
 		}
 	}
 
@@ -926,19 +964,15 @@ public class ModuloRel extends Relation {
 	}
 
 	public BooleanFormula toJSMTFull() {
-		IntegerFormulaManager ifm = CR.solver.getIfm();
-		BooleanFormulaManager bfm = CR.solver.getBfm();
-		QuantifiedFormulaManager qfm = CR.solver.getQfm();
+		JavaSMTSolver jsmt = CR.solver;
 		
-		ArrayList<BooleanFormula> constraints1 = this.linConstrs.toJSMTList(ifm);
+		ArrayList<BooleanFormula> constraints1 = this.linConstrs.toJSMTList(jsmt);
 		
-		ArrayList<BooleanFormula> constraints2 = this.modConstrs.toJSMTList(ifm, bfm, qfm);
+		ArrayList<BooleanFormula> constraints2 = this.modConstrs.toJSMTList(jsmt);
 
 		constraints1.addAll(constraints2); // TODO: check if correct
 
-		String tmp = constraints1.toString();
-
-		return bfm.and(constraints1);
+		return jsmt.getBfm().and(constraints1);
 	}
 
 	public StringBuffer toSBYicesFull() {

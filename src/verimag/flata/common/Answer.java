@@ -17,7 +17,7 @@ public enum Answer {
 		else
 			return FALSE;
 	}
-	public static Answer createFromInvertedAnswer(boolean b) {
+	public static Answer createInvertedAnswer(boolean b) {
 		if (b)
 			return FALSE;
 		else

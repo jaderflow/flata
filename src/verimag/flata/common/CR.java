@@ -216,6 +216,7 @@ public class CR {
 	}
 
 	
+	// TODO: remove, never used?? If so does not need JavaSMT version
 	public static StringBuffer prepareYicesFormula(StringBuffer aDeclarations, StringBuffer aAssertContent, boolean aShowEvidence) {
 		return prepareYicesFormula(aDeclarations, aAssertContent, new StringBuffer(), aShowEvidence);
 	}

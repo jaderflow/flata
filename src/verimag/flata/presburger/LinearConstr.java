@@ -9,6 +9,7 @@ import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 
 import verimag.flata.common.CR;
+import verimag.flata.common.JavaSMTSolver;
 
 /**
  * 
@@ -385,22 +386,22 @@ public class LinearConstr extends HashMap<Variable, LinearTerm> implements Const
 		}
 	}
 
-	public IntegerFormula toJSMT(IntegerFormulaManager ifm, String s_u, String s_p) {
+	public IntegerFormula toJSMT(JavaSMTSolver jsmt, String s_u, String s_p) {
 		Collection<LinearTerm> values = this.values();
 		Iterator<LinearTerm> iter = values.iterator();
 
 		if (values.size() == 1) {
-			return iter.next().toJSMT(ifm, s_u, s_p);
+			return iter.next().toJSMT(jsmt, s_u, s_p);
 		}
 
 		ArrayList<IntegerFormula> termFormulas = new ArrayList<IntegerFormula>();
 
 		while (iter.hasNext()) {
 			LinearTerm term = iter.next();
-            termFormulas.add(term.toJSMT(ifm, s_u, s_p));
+            termFormulas.add(term.toJSMT(jsmt, s_u, s_p));
 		}
 
-		return ifm.sum(termFormulas);
+		return jsmt.getIfm().sum(termFormulas);
 	}
 
 	public StringBuffer toSBYices(String s_u, String s_p) {
