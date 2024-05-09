@@ -504,17 +504,17 @@ public class OctagonRel extends Relation implements DBOct {
 	
 
 	// TODO: remove
-	public void toSBYicesAsConj(IndentedWriter aIW, String s_u, String s_p) {
-		CR.yicesAndStart(aIW);
-		dbm.toStringBufYicesList_oct(aIW, varsOrig, s_u, s_p, false);
-		CR.yicesAndEnd(aIW);
-	}
-	public void toSBYicesAsConj(IndentedWriter aIW) {
-		toSBYicesAsConj(aIW, null, null);
-	}
-	public void toSBYicesList(IndentedWriter iw, boolean negate) {
-		dbm.toStringBufYicesList_oct(iw, varsOrig, null, null, negate);
-	}
+	// public void toSBYicesAsConj(IndentedWriter aIW, String s_u, String s_p) {
+	// 	CR.yicesAndStart(aIW);
+	// 	dbm.toStringBufYicesList_oct(aIW, varsOrig, s_u, s_p, false);
+	// 	CR.yicesAndEnd(aIW);
+	// }
+	// public void toSBYicesAsConj(IndentedWriter aIW) {
+	// 	toSBYicesAsConj(aIW, null, null);
+	// }
+	// public void toSBYicesList(IndentedWriter iw, boolean negate) {
+	// 	dbm.toStringBufYicesList_oct(iw, varsOrig, null, null, negate);
+	// }
 	
 	public void refVars(Collection<Variable> aCol) {
 		aCol.addAll(Arrays.asList(varsOrig));

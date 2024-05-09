@@ -13,7 +13,9 @@ import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
 import verimag.flata.common.JavaSMTSolver;
-import verimag.flata.common.YicesAnswer;
+
+// TODO: remove
+// import verimag.flata.common.YicesAnswer;
 
 public class ModuloRel extends Relation {
 
@@ -139,8 +141,8 @@ public class ModuloRel extends Relation {
 		+ ((modConstrs.size() == 0)? "" : ", ") + modConstrs;
 	}
 
-	public void toJSMTAsConj(JavaSMTSolver jsmt) {
-		toJSMTAsConj(jsmt, null, null);
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
+		return toJSMTAsConj(jsmt, null, null);
 	}
 
 	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
@@ -176,36 +178,36 @@ public class ModuloRel extends Relation {
 	
 
 	// TODO: remove these
-	public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
-		int lsize = linConstrs.size();
-		int msize = modConstrs.size();
+	// public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
+	// 	int lsize = linConstrs.size();
+	// 	int msize = modConstrs.size();
 
-		if (lsize + msize == 0) {
-			iw.writeln("true");
-			return;
-		}
+	// 	if (lsize + msize == 0) {
+	// 		iw.writeln("true");
+	// 		return;
+	// 	}
 
-		iw.writeln("(and");
-		iw.indentInc();
-		{
-			if (lsize > 0)
-				linConstrs.toSBYicesList(iw, s_u, s_p);
-			if (msize > 0)
-				modConstrs.toSBYicesList(iw, s_u, s_p);
-		}
-		iw.indentDec();
-		iw.writeln(")");
-	}
+	// 	iw.writeln("(and");
+	// 	iw.indentInc();
+	// 	{
+	// 		if (lsize > 0)
+	// 			linConstrs.toSBYicesList(iw, s_u, s_p);
+	// 		if (msize > 0)
+	// 			modConstrs.toSBYicesList(iw, s_u, s_p);
+	// 	}
+	// 	iw.indentDec();
+	// 	iw.writeln(")");
+	// }
 	
-	public void toSBYicesAsConj(IndentedWriter aIW) {
-		toSBYicesAsConj(aIW, null, null);
-	}
+	// public void toSBYicesAsConj(IndentedWriter aIW) {
+	// 	toSBYicesAsConj(aIW, null, null);
+	// }
 	
-	// TODO: find what uses this, remove
-	public void toSBYicesList(IndentedWriter iw, boolean negate) {
-		this.linConstrs.toSBYicesList(iw, negate);
-		this.modConstrs.toSBYicesList(iw, negate);
-	}
+	// // TODO: find what uses this, remove
+	// public void toSBYicesList(IndentedWriter iw, boolean negate) {
+	// 	this.linConstrs.toSBYicesList(iw, negate);
+	// 	this.modConstrs.toSBYicesList(iw, negate);
+	// }
 
 	public ModuloRel substitute(Variable aVar, LinearConstr aEQ) {
 		ModuloRel ret = new ModuloRel(linConstrs.substitute(aVar, aEQ), modConstrs.substitute(aVar, aEQ), false);
@@ -796,66 +798,66 @@ public class ModuloRel extends Relation {
 	}
 
 	// TODO: remove this
-	public Answer includes2(Relation otherRel) {
-		if (!(otherRel instanceof ModuloRel)) {
+	// public Answer includes2(Relation otherRel) {
+	// 	if (!(otherRel instanceof ModuloRel)) {
 
-			return Relation.includes(this, otherRel);
-		} else {
+	// 		return Relation.includes(this, otherRel);
+	// 	} else {
 			
-			ModuloRel other = (ModuloRel) otherRel;
+	// 		ModuloRel other = (ModuloRel) otherRel;
 			
-			// try to avoid using modulos
-			{
-				if (this.modConstrs.includesForSure(other.modConstrs)
-						&& this.linConstrs.includes(other.linConstrs).isTrue()) {
-					return Answer.TRUE;
-				}
-			}
+	// 		// try to avoid using modulos
+	// 		{
+	// 			if (this.modConstrs.includesForSure(other.modConstrs)
+	// 					&& this.linConstrs.includes(other.linConstrs).isTrue()) {
+	// 				return Answer.TRUE;
+	// 			}
+	// 		}
 
-			StringWriter sw = new StringWriter();
-			IndentedWriter iw = new IndentedWriter(sw);
+	// 		StringWriter sw = new StringWriter();
+	// 		IndentedWriter iw = new IndentedWriter(sw);
 
-			iw.writeln("(reset)");
+	// 		iw.writeln("(reset)");
 
-			// define
-			Set<Variable> vars = this.variables();
-			other.refVars(vars);
-			CR.yicesDefineVars(iw, vars);
+	// 		// define
+	// 		Set<Variable> vars = this.variables();
+	// 		other.refVars(vars);
+	// 		CR.yicesDefineVars(iw, vars);
 
-			iw.writeln("(assert");
-			iw.indentInc();
+	// 		iw.writeln("(assert");
+	// 		iw.indentInc();
 
-			// other \subseteq this
-			iw.writeln("(and");
-			iw.indentInc();
+	// 		// other \subseteq this
+	// 		iw.writeln("(and");
+	// 		iw.indentInc();
 			
-			other.linConstrs.toSBYicesList(iw, false); // not negated
-			other.modConstrs.toSBYicesList(iw, false); // not negated
+	// 		other.linConstrs.toSBYicesList(iw, false); // not negated
+	// 		other.modConstrs.toSBYicesList(iw, false); // not negated
 
-			iw.writeln("(or");
-			iw.indentInc();
-			this.linConstrs.toSBYicesList(iw, true); // negated
-			this.modConstrs.toSBYicesList(iw, true); // negated
+	// 		iw.writeln("(or");
+	// 		iw.indentInc();
+	// 		this.linConstrs.toSBYicesList(iw, true); // negated
+	// 		this.modConstrs.toSBYicesList(iw, true); // negated
 
-			iw.indentDec();
-			iw.writeln(")"); // or
-			iw.indentDec();
-			iw.writeln(")"); // and
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // or
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // and
 
-			iw.indentDec();
-			iw.writeln(")"); // assert
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // assert
 
-			iw.writeln("(check)");
+	// 		iw.writeln("(check)");
 
-			StringBuffer yc = new StringBuffer();
-			YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
+	// 		StringBuffer yc = new StringBuffer();
+	// 		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 
-			//if (ya.isKnown())
-			//	System.err.println("known answer for modulo: \n"+this+"\n"+otherRel);
+	// 		//if (ya.isKnown())
+	// 		//	System.err.println("known answer for modulo: \n"+this+"\n"+otherRel);
 			
-			return Answer.createFromYicesUnsat(ya);
-		}
-	}
+	// 		return Answer.createFromYicesUnsat(ya);
+	// 	}
+	// }
 
 	public Relation[] intersect(Relation otherRel) {
 		if (!(otherRel instanceof ModuloRel)) {
@@ -924,7 +926,8 @@ public class ModuloRel extends Relation {
 
 		return CR.solver.isSatisfiable(this.toJSMTFull());
 
-		// return Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc)); // TODO: remove this
+		// TODO: remove this
+		// return Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc)); 
 	}
 
 	public DBRel toDBRel() {
@@ -975,35 +978,36 @@ public class ModuloRel extends Relation {
 		return jsmt.getBfm().and(constraints1);
 	}
 
-	public StringBuffer toSBYicesFull() {
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+	// TODO: remove
+	// public StringBuffer toSBYicesFull() {
+	// 	StringWriter sw = new StringWriter();
+	// 	IndentedWriter iw = new IndentedWriter(sw);
 
-		iw.writeln("(reset)");
+	// 	iw.writeln("(reset)");
 
-		Set<Variable> vars = this.variables();
-		CR.yicesDefineVars(iw, vars);
+	// 	Set<Variable> vars = this.variables();
+	// 	CR.yicesDefineVars(iw, vars);
 
-		iw.writeln("(assert");
-		iw.indentInc();
-		{
-			iw.writeln("(and");
-			iw.indentInc();
+	// 	iw.writeln("(assert");
+	// 	iw.indentInc();
+	// 	{
+	// 		iw.writeln("(and");
+	// 		iw.indentInc();
 
-			this.linConstrs.toSBYicesList(iw);
+	// 		this.linConstrs.toSBYicesList(iw);
 
-			this.modConstrs.toSBYicesList(iw);
+	// 		this.modConstrs.toSBYicesList(iw);
 
-			iw.indentDec();
-			iw.writeln(")");
-		}
+	// 		iw.indentDec();
+	// 		iw.writeln(")");
+	// 	}
 
-		iw.indentDec();
-		iw.writeln(")");
-		iw.writeln("(check)");
+	// 	iw.indentDec();
+	// 	iw.writeln(")");
+	// 	iw.writeln("(check)");
 
-		return sw.getBuffer();
-	}
+	// 	return sw.getBuffer();
+	// }
 
 	public boolean isFASTCompatible() {
 		// no modulo constrains on prime variables

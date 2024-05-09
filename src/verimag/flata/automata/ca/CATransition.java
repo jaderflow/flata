@@ -12,8 +12,9 @@ import verimag.flata.common.IndentedWriter;
 import verimag.flata.common.JavaSMTSolver;
 import verimag.flata.common.Label;
 import verimag.flata.common.Parameters;
-import verimag.flata.common.YicesAnswer;
 import verimag.flata.presburger.*;
+// TODO: remove
+//import verimag.flata.common.YicesAnswer;
 
 public class CATransition extends BaseArc implements java.lang.Comparable<CATransition> {
 	
@@ -560,26 +561,27 @@ public class CATransition extends BaseArc implements java.lang.Comparable<CATran
 		return sb;
 	}
 
-	public static void toSBYicesListPart(Collection<CATransition> col, IndentedWriter iw) {
+	// TODO: remove
+	// public static void toSBYicesListPart(Collection<CATransition> col, IndentedWriter iw) {
 
-		if (col.size() == 1) {
+	// 	if (col.size() == 1) {
 
-			col.iterator().next().labAsRel().toSBYicesAsConj(iw);
+	// 		col.iterator().next().labAsRel().toSBYicesAsConj(iw);
 
-		} else {
+	// 	} else {
 
-			iw.writeln("(or");
-			iw.indentInc();
+	// 		iw.writeln("(or");
+	// 		iw.indentInc();
 
-			for (CATransition t : col) {
-				t.labAsRel().toSBYicesAsConj(iw);
-			}
+	// 		for (CATransition t : col) {
+	// 			t.labAsRel().toSBYicesAsConj(iw);
+	// 		}
 
-			iw.indentDec();
-			iw.writeln(")");
+	// 		iw.indentDec();
+	// 		iw.writeln(")");
 
-		}
-	}
+	// 	}
+	// }
 
 	public boolean isFASTCompatible(int v_cnt) {
 		return labAsRel().isFASTCompatible(v_cnt);
@@ -748,7 +750,7 @@ public class CATransition extends BaseArc implements java.lang.Comparable<CATran
 
 	// not contradictory is not the same as satisfiable
 	// not satisfiable is not the same as contradictory
-	// (since Yices may say unknown)
+	// (since SMT solver may say unknown)
 	public boolean isContradictory() { 
 		return labAsRel().contradictory();
 	}

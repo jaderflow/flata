@@ -560,59 +560,59 @@ public class LinearRel extends Relation {
 	}
 
 	// TODO: remove these
-	public void toSBYicesList(IndentedWriter iw, String s_u, String s_p) {
-		toSBYicesList(iw, false, s_u, s_p);
-	}
-	public void toSBYicesList(IndentedWriter iw) {
-		toSBYicesList(iw, false, null, null);
-	}
-	public void toSBYicesList(IndentedWriter iw, boolean negate) {
-		toSBYicesList(iw, negate, null, null);
-	}
-	// list constraints without any boolean operator
-	public void toSBYicesList(IndentedWriter iw, boolean negate, String s_u, String s_p) {
+	// public void toSBYicesList(IndentedWriter iw, String s_u, String s_p) {
+	// 	toSBYicesList(iw, false, s_u, s_p);
+	// }
+	// public void toSBYicesList(IndentedWriter iw) {
+	// 	toSBYicesList(iw, false, null, null);
+	// }
+	// public void toSBYicesList(IndentedWriter iw, boolean negate) {
+	// 	toSBYicesList(iw, negate, null, null);
+	// }
+	// // list constraints without any boolean operator
+	// public void toSBYicesList(IndentedWriter iw, boolean negate, String s_u, String s_p) {
 		
-		if (this.simpleContradiction) {
-			iw.writeln("false");
-			return;
-		}
+	// 	if (this.simpleContradiction) {
+	// 		iw.writeln("false");
+	// 		return;
+	// 	}
 		
-		String rel = (negate) ? ">" : "<=";
+	// 	String rel = (negate) ? ">" : "<=";
 
-		for (LinearConstr c : linConstraints_inter) {
-			iw.writeln("(" + rel + " " + c.toSBYices(s_u, s_p) + " 0)");
-		}
-	}
+	// 	for (LinearConstr c : linConstraints_inter) {
+	// 		iw.writeln("(" + rel + " " + c.toSBYices(s_u, s_p) + " 0)");
+	// 	}
+	// }
 
 	public BooleanFormula toJSMTFull() {
 		return toJSMTAsConj(CR.solver);
 	}
 
 	// TODO: remove this
-	public StringBuffer toSBYicesFull() {
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+	// public StringBuffer toSBYicesFull() {
+	// 	StringWriter sw = new StringWriter();
+	// 	IndentedWriter iw = new IndentedWriter(sw);
 
-		iw.writeln("(reset)");
+	// 	iw.writeln("(reset)");
 
-		Set<Variable> vars = new HashSet<Variable>();
-		for (LinearConstr c : linConstraints_inter)
-			c.variables(vars);
+	// 	Set<Variable> vars = new HashSet<Variable>();
+	// 	for (LinearConstr c : linConstraints_inter)
+	// 		c.variables(vars);
 
-		CR.yicesDefineVars(iw, vars);
+	// 	CR.yicesDefineVars(iw, vars);
 
-		iw.writeln("(assert");
-		iw.indentInc();
-		{
-			toSBYicesAsConj(iw);
-		}
+	// 	iw.writeln("(assert");
+	// 	iw.indentInc();
+	// 	{
+	// 		toSBYicesAsConj(iw);
+	// 	}
 
-		iw.indentDec();
-		iw.writeln(")");
-		iw.writeln("(check)");
+	// 	iw.indentDec();
+	// 	iw.writeln(")");
+	// 	iw.writeln("(check)");
 
-		return sw.getBuffer();
-	}
+	// 	return sw.getBuffer();
+	// }
 	
 	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
 		return toJSMTAsConj(jsmt, null, null);
@@ -632,22 +632,22 @@ public class LinearRel extends Relation {
 	}
 
 	// TODO: remove
-	public void toSBYicesAsConj(IndentedWriter aIW) {
-		toSBYicesAsConj(aIW, null, null);
-	}
-	// TODO: remove
-	public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
-		if (this.linConstraints_inter.size() == 0)
-			return;
+	// public void toSBYicesAsConj(IndentedWriter aIW) {
+	// 	toSBYicesAsConj(aIW, null, null);
+	// }
+	// // TODO: remove
+	// public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
+	// 	if (this.linConstraints_inter.size() == 0)
+	// 		return;
 
-		iw.writeln("(and");
-		iw.indentInc();
+	// 	iw.writeln("(and");
+	// 	iw.indentInc();
 
-		this.toSBYicesList(iw, s_u, s_p);
+	// 	this.toSBYicesList(iw, s_u, s_p);
 
-		iw.indentDec();
-		iw.writeln(")");
-	}
+	// 	iw.indentDec();
+	// 	iw.writeln(")");
+	// }
 	
 	
 	
@@ -677,18 +677,18 @@ public class LinearRel extends Relation {
 		return vars;
 	}
 
-	public void exportToYices(String aFilename) {
+	// public void exportToYices(String aFilename) {
 
-		try {
-			java.io.FileWriter fstream = new java.io.FileWriter(aFilename);
-			java.io.BufferedWriter out = new java.io.BufferedWriter(fstream);
-			out.write(new String(toSBYicesFull()));
-			out.close();
-		} catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
-			System.exit(-1);
-		}
-	}
+	// 	try {
+	// 		java.io.FileWriter fstream = new java.io.FileWriter(aFilename);
+	// 		java.io.BufferedWriter out = new java.io.BufferedWriter(fstream);
+	// 		out.write(new String(toSBYicesFull()));
+	// 		out.close();
+	// 	} catch (Exception e) {
+	// 		System.err.println("Error: " + e.getMessage());
+	// 		System.exit(-1);
+	// 	}
+	// }
 
 	/**
 	 * removes a term with the specified variable for every linear constraint
@@ -2423,45 +2423,46 @@ new_lr = LinearRel.substituteConstants(aLR);
 		return jsmt.isSatisfiable(constraints, true);
 	}
 
-	private Answer includes_yices(LinearRel other) {
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+	// TODO: remove
+	// private Answer includes_yices(LinearRel other) {
+	// 	StringWriter sw = new StringWriter();
+	// 	IndentedWriter iw = new IndentedWriter(sw);
 
-		iw.writeln("(reset)");
+	// 	iw.writeln("(reset)");
 
-		// define
-		Set<Variable> vars = this.variables();
-		other.refVars(vars);
-		CR.yicesDefineVars(iw, vars);
+	// 	// define
+	// 	Set<Variable> vars = this.variables();
+	// 	other.refVars(vars);
+	// 	CR.yicesDefineVars(iw, vars);
 
-		iw.writeln("(assert");
-		iw.indentInc();
+	// 	iw.writeln("(assert");
+	// 	iw.indentInc();
 
-		// other \subseteq this
-		iw.writeln("(and");
-		iw.indentInc();
-		other.toSBYicesList(iw, false); // not negated
+	// 	// other \subseteq this
+	// 	iw.writeln("(and");
+	// 	iw.indentInc();
+	// 	other.toSBYicesList(iw, false); // not negated
 
-		iw.writeln("(or");
-		iw.indentInc();
-		this.toSBYicesList(iw, true); // negated
+	// 	iw.writeln("(or");
+	// 	iw.indentInc();
+	// 	this.toSBYicesList(iw, true); // negated
 
-		iw.indentDec();
-		iw.writeln(")"); // or
-		iw.indentDec();
-		iw.writeln(")"); // and
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // or
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // and
 
-		iw.indentDec();
-		iw.writeln(")"); // assert
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // assert
 
-		iw.writeln("(check)");
+	// 	iw.writeln("(check)");
 
-		StringBuffer yc = new StringBuffer();
-		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
+	// 	StringBuffer yc = new StringBuffer();
+	// 	YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 
-		// unsat implies that relation is included
-		return Answer.createFromYicesUnsat(ya);
-	}
+	// 	// unsat implies that relation is included
+	// 	return Answer.createFromYicesUnsat(ya);
+	// }
 	
 	private Answer includes_glpk(LinearRel other) {
 		boolean b = GLPKInclusion.isIncluded(other, this);

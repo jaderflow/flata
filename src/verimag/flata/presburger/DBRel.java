@@ -632,6 +632,10 @@ public class DBRel extends Relation implements DBOct {
 	public String toString() {
 		return toStringBuf().toString();
 	}
+
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
+		return toJSMTAsConj(jsmt, null, null);
+	}
 	
 	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String suf_unp, String suf_p) {
 		ArrayList<BooleanFormula> constraints = dbm.toJSMTList_dbc(jsmt, varsOrig, suf_unp, suf_p, false);
@@ -644,17 +648,17 @@ public class DBRel extends Relation implements DBOct {
 	}
 
 	// TODO: remove
-	public void toSBYicesAsConj(IndentedWriter aIW, String suf_unp, String suf_p) {
-		CR.yicesAndStart(aIW);
-		dbm.toStringBufYicesList_dbc(aIW, suf_unp, suf_p, false, varsOrig);
-		CR.yicesAndEnd(aIW);
-	}
-	public void toSBYicesAsConj(IndentedWriter aIW) {
-		toSBYicesAsConj(aIW, null, null);
-	}
-	public void toSBYicesList(IndentedWriter iw, boolean negate) {
-		dbm.toStringBufYicesList_dbc(iw, null, null, negate, varsOrig);
-	}
+	// public void toSBYicesAsConj(IndentedWriter aIW, String suf_unp, String suf_p) {
+	// 	CR.yicesAndStart(aIW);
+	// 	dbm.toStringBufYicesList_dbc(aIW, suf_unp, suf_p, false, varsOrig);
+	// 	CR.yicesAndEnd(aIW);
+	// }
+	// public void toSBYicesAsConj(IndentedWriter aIW) {
+	// 	toSBYicesAsConj(aIW, null, null);
+	// }
+	// public void toSBYicesList(IndentedWriter iw, boolean negate) {
+	// 	dbm.toStringBufYicesList_dbc(iw, null, null, negate, varsOrig);
+	// }
 	
 	public void refVars(Collection<Variable> aCol) {
 		aCol.addAll(Arrays.asList(varsOrig));

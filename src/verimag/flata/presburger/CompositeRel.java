@@ -1604,22 +1604,22 @@ public class CompositeRel extends RelationCommon implements Label {
 
 
 	//TODO: remove
-	@Override
-	public void toSBYicesAsConj(IndentedWriter iw) {
-		toSBYicesAsConj(iw, null, null);
-	}
+	// @Override
+	// public void toSBYicesAsConj(IndentedWriter iw) {
+	// 	toSBYicesAsConj(iw, null, null);
+	// }
 
-	public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
-		iw.writeln("(and");
-		iw.indentInc();
+	// public void toSBYicesAsConj(IndentedWriter iw, String s_u, String s_p) {
+	// 	iw.writeln("(and");
+	// 	iw.indentInc();
 
-		iw.writeln("true");
-		for (Relation r : this.rels)
-			r.toSBYicesAsConj(iw, s_u, s_p);
+	// 	iw.writeln("true");
+	// 	for (Relation r : this.rels)
+	// 		r.toSBYicesAsConj(iw, s_u, s_p);
 
-		iw.indentDec();
-		iw.writeln(")");
-	}
+	// 	iw.indentDec();
+	// 	iw.writeln(")");
+	// }
 
 	public ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, boolean negate) {
 		ArrayList<BooleanFormula> constraints = new ArrayList<>();
@@ -1630,10 +1630,10 @@ public class CompositeRel extends RelationCommon implements Label {
 	}
 
 	//TODO: remove
-	public void toSBYicesList(IndentedWriter iw, boolean negate) {
-		for (Relation r : this.rels)
-			r.toSBYicesList(iw, negate);
-	}
+	// public void toSBYicesList(IndentedWriter iw, boolean negate) {
+	// 	for (Relation r : this.rels)
+	// 		r.toSBYicesList(iw, negate);
+	// }
 
 	private void extendBy(int nVars, int nRels) {
 		this.vars = Arrays.copyOf(this.vars, nVars);
@@ -1937,65 +1937,65 @@ public class CompositeRel extends RelationCommon implements Label {
 		return jsmt.isSatisfiable(formula, true);
 	}
 	
-	public static Answer subsumedOLD(Collection<String> vars, CompositeRel r, Collection<CompositeRel> rels) {
+	// TODO: remove
+	// public static Answer subsumedOLD(Collection<String> vars, CompositeRel r, Collection<CompositeRel> rels) {
 		
-		if (rels.isEmpty())
-			return Answer.FALSE;
+	// 	if (rels.isEmpty())
+	// 		return Answer.FALSE;
 		
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+	// 	StringWriter sw = new StringWriter();
+	// 	IndentedWriter iw = new IndentedWriter(sw);
 
-		iw.writeln("(reset)");
+	// 	iw.writeln("(reset)");
 
-		// define
-		CR.yicesDefineVarsS(iw, vars);
+	// 	// define
+	// 	CR.yicesDefineVarsS(iw, vars);
 
-		iw.writeln("(assert");
-		iw.indentInc();
+	// 	iw.writeln("(assert");
+	// 	iw.indentInc();
 
-		// other \subseteq this
-		iw.writeln("(and");
-		iw.indentInc();
-		r.toSBYicesList(iw, false); // not negated
+	// 	// other \subseteq this
+	// 	iw.writeln("(and");
+	// 	iw.indentInc();
+	// 	r.toSBYicesList(iw, false); // not negated
 
-		for (CompositeRel rr : rels) {
-			iw.writeln("(or");
-			iw.indentInc();
-			rr.toSBYicesList(iw, true); // negated
+	// 	for (CompositeRel rr : rels) {
+	// 		iw.writeln("(or");
+	// 		iw.indentInc();
+	// 		rr.toSBYicesList(iw, true); // negated
 	
-			iw.indentDec();
-			iw.writeln(")"); // or
-		}
-		iw.indentDec();
-		iw.writeln(")"); // and
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // or
+	// 	}
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // and
 
-		iw.indentDec();
-		iw.writeln(")"); // assert
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // assert
 
-		iw.writeln("(check)");
+	// 	iw.writeln("(check)");
 
 		
-		//System.out.println("INCL LHS: "+r);
-		//System.out.print("INCL RHS: ");
-		//for (CompositeRel rr : rels) {
-		//	System.out.println("  "+rr);
-		//}
-		//System.out.println("YICES INPUT: "+sw);
-		//System.out.println("CALLING YICES");
+	// 	//System.out.println("INCL LHS: "+r);
+	// 	//System.out.print("INCL RHS: ");
+	// 	//for (CompositeRel rr : rels) {
+	// 	//	System.out.println("  "+rr);
+	// 	//}
+	// 	//System.out.println("YICES INPUT: "+sw);
+	// 	//System.out.println("CALLING YICES");
 		
 		
-		StringBuffer yc = new StringBuffer();
-		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
+	// 	StringBuffer yc = new StringBuffer();
+	// 	YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 		
 		
-		//System.out.println("YICES RETURNED");
-		//System.out.println("YICES OUTPUT: "+ya);
+	// 	//System.out.println("YICES RETURNED");
+	// 	//System.out.println("YICES OUTPUT: "+ya);
 		
 
-		// unsat implies that relation is included
-		return Answer.createFromYicesUnsat(ya);
-		
-	}
+	// 	// unsat implies that relation is included
+	// 	return Answer.createFromYicesUnsat(ya);
+	// }
 	
 	// assumption: relation is Linear
 	public Expr toNTS() {

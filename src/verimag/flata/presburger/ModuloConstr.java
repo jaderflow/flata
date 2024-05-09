@@ -186,28 +186,28 @@ public class ModuloConstr implements Constr {
 		return finalFormula;
 	}
 
-	public void toSBYicesListPart(IndentedWriter iw, boolean negate, String s_u, String s_p) {
+	// public void toSBYicesListPart(IndentedWriter iw, boolean negate, String s_u, String s_p) {
 		
-		if (!negate) {
-			iw.writeln("(exists ("+param_name+"::int)");
-			iw.indentInc();
-			{
-				iw.writeln("(="+" "+constr.toSBYices(s_u,s_p)+"(* "+modulus+" "+param_name+")"+")");
-			}
-			iw.indentDec();
-			iw.writeln(")");
-		} else {
-			for (int i=1; i<modulus; i++) {
-				iw.writeln("(exists ("+param_name+"::int)");
-				iw.indentInc();
-				{
-					iw.writeln("(="+" "+constr.toSBYices(s_u,s_p)+"(+ (* "+modulus+" "+param_name+")"+" "+i+"))");
-				}
-				iw.indentDec();
-				iw.writeln(")");
-			}
-		}
-	}
+	// 	if (!negate) {
+	// 		iw.writeln("(exists ("+param_name+"::int)");
+	// 		iw.indentInc();
+	// 		{
+	// 			iw.writeln("(="+" "+constr.toSBYices(s_u,s_p)+"(* "+modulus+" "+param_name+")"+")");
+	// 		}
+	// 		iw.indentDec();
+	// 		iw.writeln(")");
+	// 	} else {
+	// 		for (int i=1; i<modulus; i++) {
+	// 			iw.writeln("(exists ("+param_name+"::int)");
+	// 			iw.indentInc();
+	// 			{
+	// 				iw.writeln("(="+" "+constr.toSBYices(s_u,s_p)+"(+ (* "+modulus+" "+param_name+")"+" "+i+"))");
+	// 			}
+	// 			iw.indentDec();
+	// 			iw.writeln(")");
+	// 		}
+	// 	}
+	// }
 	
 	public Set<Variable> variables() {
 		return constr.variables();

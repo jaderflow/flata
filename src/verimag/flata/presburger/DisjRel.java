@@ -15,8 +15,9 @@ import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
 import verimag.flata.common.JavaSMTSolver;
-import verimag.flata.common.YicesAnswer;
 import nts.parser.*;
+// TODO: remove
+// import verimag.flata.common.YicesAnswer;
 
 public class DisjRel {
 
@@ -536,74 +537,74 @@ public class DisjRel {
 	}
 
 	// TODO: remove this
-	public Answer impliesOLD(DisjRel other) {
-		if (this.disjuncts.size() == 0 && other.disjuncts.size() == 0) {
-			return Answer.FALSE;
-		} else if (other.disjuncts.size() > 0 && other.disjuncts.iterator().next().isTrue()) {
-			return Answer.TRUE;
-		} else {
-			StringWriter sw = new StringWriter();
-			IndentedWriter iw = new IndentedWriter(sw);
+	// public Answer impliesOLD(DisjRel other) {
+	// 	if (this.disjuncts.size() == 0 && other.disjuncts.size() == 0) {
+	// 		return Answer.FALSE;
+	// 	} else if (other.disjuncts.size() > 0 && other.disjuncts.iterator().next().isTrue()) {
+	// 		return Answer.TRUE;
+	// 	} else {
+	// 		StringWriter sw = new StringWriter();
+	// 		IndentedWriter iw = new IndentedWriter(sw);
 
-			iw.writeln("(reset)");
+	// 		iw.writeln("(reset)");
 
-			// define
-			Set<Variable> vars = new HashSet<Variable>();
-			Set<Variable> aux = this.refVarsAsUnp();
-			aux.addAll(other.refVarsAsUnp());
-			for (Variable v : aux) {
-				vars.add(v);
-				vars.add(v.getCounterpart());
-			}
-			CR.yicesDefineVars(iw, vars);
+	// 		// define
+	// 		Set<Variable> vars = new HashSet<Variable>();
+	// 		Set<Variable> aux = this.refVarsAsUnp();
+	// 		aux.addAll(other.refVarsAsUnp());
+	// 		for (Variable v : aux) {
+	// 			vars.add(v);
+	// 			vars.add(v.getCounterpart());
+	// 		}
+	// 		CR.yicesDefineVars(iw, vars);
 
-			iw.writeln("(assert");
-			iw.indentInc();
+	// 		iw.writeln("(assert");
+	// 		iw.indentInc();
 			
-			iw.writeln("(not (=>");
-			iw.indentInc();
+	// 		iw.writeln("(not (=>");
+	// 		iw.indentInc();
 
-			iw.writeln("(or");
-			iw.indentInc();
+	// 		iw.writeln("(or");
+	// 		iw.indentInc();
 			
-			if (disjuncts.size() == 0) {
-				iw.writeln("false");
-			} else {
-				for (CompositeRel r : this.disjuncts) {
-					r.toModuloRel().toSBYicesAsConj(iw);
-				}
-			}
+	// 		if (disjuncts.size() == 0) {
+	// 			iw.writeln("false");
+	// 		} else {
+	// 			for (CompositeRel r : this.disjuncts) {
+	// 				r.toModuloRel().toSBYicesAsConj(iw);
+	// 			}
+	// 		}
 
-			iw.indentDec();
-			iw.writeln(")"); // or
-			iw.writeln("(or");
-			iw.indentInc();
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // or
+	// 		iw.writeln("(or");
+	// 		iw.indentInc();
 			
-			if (other.disjuncts.size() == 0) {
-				iw.writeln("false");
-			} else {
-				for (CompositeRel r : other.disjuncts) {
-					r.toModuloRel().toSBYicesAsConj(iw);
-				}
-			}
+	// 		if (other.disjuncts.size() == 0) {
+	// 			iw.writeln("false");
+	// 		} else {
+	// 			for (CompositeRel r : other.disjuncts) {
+	// 				r.toModuloRel().toSBYicesAsConj(iw);
+	// 			}
+	// 		}
 
-			iw.indentDec();
-			iw.writeln(")"); // or
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // or
 
-			iw.indentDec();
-			iw.writeln("))"); // not =>
+	// 		iw.indentDec();
+	// 		iw.writeln("))"); // not =>
 
-			iw.indentDec();
-			iw.writeln(")"); // assert
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // assert
 
-			iw.writeln("(check)");
+	// 		iw.writeln("(check)");
 
-			StringBuffer yc = new StringBuffer();
-			YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
+	// 		StringBuffer yc = new StringBuffer();
+	// 		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 			
-			return Answer.createFromYicesUnsat(ya);
-		}
-	}
+	// 		return Answer.createFromYicesUnsat(ya);
+	// 	}
+	// }
 	
 	public static DisjRel deterministicAcceleration(CompositeRel aGuardUnp, CompositeRel aGuardPr, CompositeRel aUpdate) {
 		Variable k = VariablePool.createSpecial("$k");

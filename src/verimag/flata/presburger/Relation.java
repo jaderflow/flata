@@ -131,18 +131,23 @@ public abstract class Relation extends RelationCommon {
 	public abstract ModuloRel toModuloRel();
 //	public abstract ModExistsRel toModExists();
 	
-
+	// produces a conjunction of constraints
+	public abstract BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt);
+	// same as above, just no primes are used:
+	//   unprimed variables suffixed with suf_unp
+	//   primed variables suffixed with suf_p
 	public abstract BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p);
+	// all referenced variables
 	public abstract ArrayList<BooleanFormula>  toJSMTList(JavaSMTSolver jsmt, boolean negate);
 
 	// TODO: remove these
 	// produces a conjunction of constraints
-	public abstract void toSBYicesAsConj(IndentedWriter aIW);
+	// public abstract void toSBYicesAsConj(IndentedWriter aIW);
 	// same as above, just no primes are used:
 	//   unprimed variables suffixed with suf_unp
 	//   primed variables suffixed with suf_p
-	public abstract void toSBYicesAsConj(IndentedWriter aIW, String s_u, String s_p);
-	public abstract void toSBYicesList(IndentedWriter iw, boolean negate);
+	// public abstract void toSBYicesAsConj(IndentedWriter aIW, String s_u, String s_p);
+	// public abstract void toSBYicesList(IndentedWriter iw, boolean negate);
 	// all referenced variables
 	
 	public abstract boolean tautology();
@@ -411,26 +416,45 @@ public abstract class Relation extends RelationCommon {
 		return ret;
 	}
 	
-	public static void toSBYicesAsDisj(Collection<Relation> col, IndentedWriter iw) {
+	public static BooleanFormula toJSMTAsDisj(Collection<Relation> col, JavaSMTSolver jsmt) {
+		BooleanFormula formula = null;
 
 		if (col.size() == 1) {
-
-			col.iterator().next().toSBYicesAsConj(iw);
-
+			col.iterator().next().toJSMTAsConj(jsmt);
 		} else {
-
-			iw.writeln("(or");
-			iw.indentInc();
+			ArrayList<BooleanFormula> formulas = new ArrayList<BooleanFormula>();
 
 			for (Relation t : col) {
-				t.toSBYicesAsConj(iw);
+				formulas.add(t.toJSMTAsConj(jsmt));
 			}
 
-			iw.indentDec();
-			iw.writeln(")");
-
+			formula = jsmt.getBfm().or(formulas);
 		}
+
+		return formula;
 	}
+
+	// TODO: remove, never used???
+	// public static void toSBYicesAsDisj(Collection<Relation> col, IndentedWriter iw) {
+
+	// 	if (col.size() == 1) {
+
+	// 		col.iterator().next().toSBYicesAsConj(iw);
+
+	// 	} else {
+
+	// 		iw.writeln("(or");
+	// 		iw.indentInc();
+
+	// 		for (Relation t : col) {
+	// 			t.toSBYicesAsConj(iw);
+	// 		}
+
+	// 		iw.indentDec();
+	// 		iw.writeln(")");
+
+	// 	}
+	// }
 	
 	public static void checkmintype(Relation rel) {
 		Relation min = Relation.toMinType(rel);

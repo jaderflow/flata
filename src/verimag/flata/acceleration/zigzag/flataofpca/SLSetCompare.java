@@ -1,11 +1,22 @@
 package verimag.flata.acceleration.zigzag.flataofpca;
 
-import java.io.StringWriter;
+// TODO: remove
+// import java.io.StringWriter;
+// import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 
 import verimag.flata.acceleration.zigzag.*;
+import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
-import verimag.flata.common.IndentedWriter;
-import verimag.flata.common.YicesAnswer;
+// TODO: remove
+// import verimag.flata.common.IndentedWriter;
+// import verimag.flata.common.YicesAnswer;
 
 // PresTAF
 import application.*;
@@ -14,117 +25,196 @@ public class SLSetCompare {
 
 	private static boolean bb = true;
 	
-	private static void toSBYices(IndentedWriter iw, LinSet ls, String k, String n, String dummy) { 		
+	private static BooleanFormula[] toJSMT(LinSet ls, String k, String n, String dummy) {
 		Point base = ls.getBase();
 		Point gen = ls.getGenerator();
-		
+
 		int a = base.getLength();
 		int b = base.getWeight();
 		int c = (gen == null)? 0 : gen.getLength();
 		int d = (gen == null)? 0 : gen.getWeight();
-		
-		iw.writeln("(= "+n+" (+ "+a+" (* "+k+" "+c+")))");
-		iw.writeln("(<= "+dummy+" (+ "+b+" (* "+k+" "+d+")))");
+
+		IntegerFormulaManager ifm = CR.solver.getIfm();
+
+		IntegerFormula mult1 = ifm.multiply(ifm.makeNumber(k), ifm.makeNumber(c));
+		IntegerFormula add1 = ifm.add(ifm.makeNumber(a), mult1);
+		BooleanFormula eq = ifm.equal(ifm.makeVariable(n), add1);
+
+		IntegerFormula mult2 = ifm.multiply(ifm.makeNumber(k), ifm.makeNumber(d));
+		IntegerFormula add2 = ifm.add(ifm.makeNumber(b), mult2);
+		BooleanFormula leq = ifm.lessOrEquals(ifm.makeVariable(dummy), add2);
+
+		return new BooleanFormula[]{eq, leq};
 	}
-	private static void toSBYices(IndentedWriter iw, SLSet sls, String n, String dummy) {
+
+	// TODO: remove
+	// private static void toSBYices(IndentedWriter iw, LinSet ls, String k, String n, String dummy) { 		
+	// 	Point base = ls.getBase();
+	// 	Point gen = ls.getGenerator();
 		
+	// 	int a = base.getLength();
+	// 	int b = base.getWeight();
+	// 	int c = (gen == null)? 0 : gen.getLength();
+	// 	int d = (gen == null)? 0 : gen.getWeight();
+		
+	// 	iw.writeln("(= "+n+" (+ "+a+" (* "+k+" "+c+")))");
+	// 	iw.writeln("(<= "+dummy+" (+ "+b+" (* "+k+" "+d+")))");
+	// }
+
+	private static BooleanFormula toJSMT(SLSet sls, String n, String dummy) {
+		BooleanFormulaManager bfm = CR.solver.getBfm();
+		IntegerFormulaManager ifm = CR.solver.getIfm();
+		QuantifiedFormulaManager qfm = CR.solver.getQfm();
+
 		if (sls == null || sls.empty()) {
-			iw.writeln("true");
-			return;
-		}
-		
-		String k = "k";
-		
-		// ########################################
-		iw.writeln("(forall ("+k+"::int)");
-		iw.indentInc();
-		
-		iw.writeln("(and ");
-		iw.indentInc();
-		
-		for (LinSet ls : sls.getLinearSets()) {
-			iw.writeln("(=> ");
-			iw.indentInc();
-			
-			toSBYices(iw,ls,k,n,dummy);
-			
-			iw.indentDec();
-			iw.writeln(")"); // =>
-		}
-		
-		iw.indentDec();
-		iw.writeln(")"); // and
-		
-		iw.indentDec();
-		iw.writeln(")"); // forall
-		
+            return bfm.makeTrue();
+        }
+
+        ArrayList<BooleanFormula> formulas = new ArrayList<>();
+        for (LinSet ls : sls.getLinearSets()) {
+            BooleanFormula[] lsFormulas = toJSMT(ls, "k", n, dummy);
+
+			formulas.add(bfm.implication(lsFormulas[0], lsFormulas[1]));
+        }
+
+        BooleanFormula allConditions = bfm.and(formulas);
+        BooleanFormula quantified = qfm.forall(ifm.makeVariable("k"), allConditions);
+
+        return quantified;
 	}
-	public static void implicationYices(IndentedWriter iw, SLSet sls1, SLSet sls2, String n, String dummy) {
-		iw.writeln("(=> ");
-		iw.indentInc();
+
+	// TODO: remove
+	// private static void toSBYices(IndentedWriter iw, SLSet sls, String n, String dummy) {
 		
-		toSBYices(iw,sls1,n,dummy);
-		toSBYices(iw,sls2,n,dummy);
+	// 	if (sls == null || sls.empty()) {
+	// 		iw.writeln("true");
+	// 		return;
+	// 	}
 		
-		iw.indentDec();
-		iw.writeln(")"); // =>
+	// 	String k = "k";
+		
+	// 	// ########################################
+	// 	iw.writeln("(forall ("+k+"::int)");
+	// 	iw.indentInc();
+		
+	// 	iw.writeln("(and ");
+	// 	iw.indentInc();
+		
+	// 	for (LinSet ls : sls.getLinearSets()) {
+	// 		iw.writeln("(=> ");
+	// 		iw.indentInc();
+			
+	// 		toSBYices(iw,ls,k,n,dummy);
+			
+	// 		iw.indentDec();
+	// 		iw.writeln(")"); // =>
+	// 	}
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // and
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // forall
+		
+	// }
+
+	public static BooleanFormula implication(SLSet sls1, SLSet sls2, String n, String dummy) {
+		BooleanFormulaManager bfm = CR.solver.getBfm();
+
+		BooleanFormula formula1 = toJSMT(sls1, n, dummy);
+		BooleanFormula formula2 = toJSMT(sls2, n, dummy);
+
+		return bfm.implication(formula1, formula2);
 	}
-	public static YicesAnswer equalYices(SLSet sls1, SLSet sls2) {
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+
+	// TODO: remove
+	// public static void implicationYices(IndentedWriter iw, SLSet sls1, SLSet sls2, String n, String dummy) {
+	// 	iw.writeln("(=> ");
+	// 	iw.indentInc();
 		
-		//String k = "k";
+	// 	toSBYices(iw,sls1,n,dummy);
+	// 	toSBYices(iw,sls2,n,dummy);
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // =>
+	// }
+
+	public static Answer equal(SLSet sls1, SLSet sls2) {
 		String n = "n";
 		String dummy = "x";
 		
-		iw.writeln("(reset)\n");
-		//iw.writeln("(define "+k+"::int)");
-		iw.writeln("(define "+n+"::int)");
-		if (bb) iw.writeln("(define "+dummy+"::int)");
-		
-		iw.writeln("(assert ");
-		iw.indentInc();
-		
-		iw.writeln("(and ");
-		iw.indentInc();
-		
-		iw.writeln("(>= "+n+" 1)");
-		
-		iw.writeln("(not ");
-		iw.indentInc();
-		
-		iw.writeln("(and ");
-		iw.indentInc();
-		
-		implicationYices(iw,sls1,sls2,n,dummy);
-		implicationYices(iw,sls2,sls1,n,dummy);
-		
-		iw.indentDec();
-		iw.writeln(")"); // and
-		
-		iw.indentDec();
-		iw.writeln(")"); // not
-		
-		iw.indentDec();
-		iw.writeln(")"); // and
-		
-		iw.indentDec();
-		iw.writeln(")"); // assert
-		
-		iw.writeln("(set-evidence! true)");
-		iw.writeln("(check)");
-		
-		StringBuffer sb = sw.getBuffer();
-		StringBuffer sb_core = new StringBuffer();
-		
-		YicesAnswer a = CR.isSatisfiableYices(sb, sb_core);
+		BooleanFormulaManager bfm = CR.solver.getBfm();
+		IntegerFormulaManager ifm = CR.solver.getIfm();
 
-		if (a == YicesAnswer.eYicesSAT) {
-			//System.out.println(sb);
-		}
-		
-		return a;
+		BooleanFormula formula1 = ifm.greaterOrEquals(ifm.makeVariable(n), ifm.makeNumber(1));
+
+		BooleanFormula implication1 = implication(sls1, sls2, n, dummy);
+		BooleanFormula implication2 = implication(sls2, sls1, n, dummy);
+
+		BooleanFormula not = bfm.not(bfm.and(implication1, implication2));
+
+		BooleanFormula formula = bfm.and(formula1, not);
+
+		return CR.solver.isSatisfiable(formula);
 	}
+
+	// TODO: remove
+	// public static YicesAnswer equalYices(SLSet sls1, SLSet sls2) {
+	// 	StringWriter sw = new StringWriter();
+	// 	IndentedWriter iw = new IndentedWriter(sw);
+		
+	// 	//String k = "k";
+	// 	String n = "n";
+	// 	String dummy = "x";
+		
+	// 	iw.writeln("(reset)\n");
+	// 	//iw.writeln("(define "+k+"::int)");
+	// 	iw.writeln("(define "+n+"::int)");
+	// 	if (bb) iw.writeln("(define "+dummy+"::int)");
+		
+	// 	iw.writeln("(assert ");
+	// 	iw.indentInc();
+		
+	// 	iw.writeln("(and ");
+	// 	iw.indentInc();
+		
+	// 	iw.writeln("(>= "+n+" 1)");
+		
+	// 	iw.writeln("(not ");
+	// 	iw.indentInc();
+		
+	// 	iw.writeln("(and ");
+	// 	iw.indentInc();
+		
+	// 	implicationYices(iw,sls1,sls2,n,dummy);
+	// 	implicationYices(iw,sls2,sls1,n,dummy);
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // and
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // not
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // and
+		
+	// 	iw.indentDec();
+	// 	iw.writeln(")"); // assert
+		
+	// 	iw.writeln("(set-evidence! true)");
+	// 	iw.writeln("(check)");
+		
+	// 	StringBuffer sb = sw.getBuffer();
+	// 	StringBuffer sb_core = new StringBuffer();
+		
+	// 	YicesAnswer a = CR.isSatisfiableYices(sb, sb_core);
+
+	// 	if (a == YicesAnswer.eYicesSAT) {
+	// 		//System.out.println(sb);
+	// 	}
+		
+	// 	return a;
+	// }
 
 	// ##########################################################################
 	

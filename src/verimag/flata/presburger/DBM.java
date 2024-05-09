@@ -1342,21 +1342,21 @@ public class DBM {
 		}
 
 		// TODO: remove
-		public void toStringBufYices(IndentedWriter iw, String s_u, String s_p, boolean negate) {
+		// public void toStringBufYices(IndentedWriter iw, String s_u, String s_p, boolean negate) {
 			
-			LinearTerm bndTerm = new LinearTerm(null,bound);
+		// 	LinearTerm bndTerm = new LinearTerm(null,bound);
 			
-			String eq = (negate)? "/=" : "=";
-			String leq = (negate)? ">" : "<=";
+		// 	String eq = (negate)? "/=" : "=";
+		// 	String leq = (negate)? ">" : "<=";
 			
-			if (lt1 != null && lt2 != null) {
-				iw.writeln("("+(isEq? eq : leq)+" (+ "+lt1.toSBYices(s_u,s_p)+" "+lt2.toSBYices(s_u,s_p)+") "+bndTerm.toSBYices(s_u,s_p)+")");
-			} else {
-				StringBuffer tmp = (lt1 == null)? lt2.toSBYices(s_u,s_p) : lt1.toSBYices(s_u,s_p);
-				iw.writeln("("+(isEq? eq : leq)+" "+tmp+" "+bndTerm.toSBYices(s_u,s_p)+")");
-			}
+		// 	if (lt1 != null && lt2 != null) {
+		// 		iw.writeln("("+(isEq? eq : leq)+" (+ "+lt1.toSBYices(s_u,s_p)+" "+lt2.toSBYices(s_u,s_p)+") "+bndTerm.toSBYices(s_u,s_p)+")");
+		// 	} else {
+		// 		StringBuffer tmp = (lt1 == null)? lt2.toSBYices(s_u,s_p) : lt1.toSBYices(s_u,s_p);
+		// 		iw.writeln("("+(isEq? eq : leq)+" "+tmp+" "+bndTerm.toSBYices(s_u,s_p)+")");
+		// 	}
 			
-		}
+		// }
 
 		public static ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, Collection<OctConstrLeqEq> aCol, String suf_unp, String suf_p, boolean negate) {
 			ArrayList<BooleanFormula> constraints = new ArrayList<>();
@@ -1368,12 +1368,12 @@ public class DBM {
 			return constraints;
 		}
 
-		// TODO: remove
-		public static void toStringBufYicesList(IndentedWriter iw, Collection<OctConstrLeqEq> aCol, String suf_unp, String suf_p, boolean negate) {
-			for (OctConstrLeqEq oc : aCol) {
-				oc.toStringBufYices(iw, suf_unp, suf_p, negate);
-			}
-		}
+		// // TODO: remove
+		// public static void toStringBufYicesList(IndentedWriter iw, Collection<OctConstrLeqEq> aCol, String suf_unp, String suf_p, boolean negate) {
+		// 	for (OctConstrLeqEq oc : aCol) {
+		// 		oc.toStringBufYices(iw, suf_unp, suf_p, negate);
+		// 	}
+		// }
 	}
 
 	public StringBuffer toStringBuf_dbc_compact(Variable[] varsOrig) {
@@ -1401,11 +1401,11 @@ public class DBM {
 	}
 
 	// TODO: remove
-	public void toStringBufYicesList_dbc(IndentedWriter iw, String suf_unp, String suf_p, boolean negate, Variable[] varsOrig) {
-		Collection<OctConstrLeqEq> col;
-		col = dbMat2OctConstrsLeqEq(varsOrig);
-		OctConstrLeqEq.toStringBufYicesList(iw, col, suf_unp, suf_p, negate);
-	}
+	// public void toStringBufYicesList_dbc(IndentedWriter iw, String suf_unp, String suf_p, boolean negate, Variable[] varsOrig) {
+	// 	Collection<OctConstrLeqEq> col;
+	// 	col = dbMat2OctConstrsLeqEq(varsOrig);
+	// 	OctConstrLeqEq.toStringBufYicesList(iw, col, suf_unp, suf_p, negate);
+	// }
 
 	public ArrayList<BooleanFormula> toJSMTList_oct(JavaSMTSolver jsmt, Variable[] vars, String suf_unp, String suf_p, boolean negate) {
 		Collection<OctConstrLeqEq> col = octMat2OctConstrsLeqEq(vars);
@@ -1413,11 +1413,11 @@ public class DBM {
 	}
 
 	//TODO: remove
-	public void toStringBufYicesList_oct(IndentedWriter iw, Variable[] vars, String suf_unp, String suf_p, boolean negate) {
-		Collection<OctConstrLeqEq> col;
-		col = octMat2OctConstrsLeqEq(vars);
-		OctConstrLeqEq.toStringBufYicesList(iw, col, suf_unp, suf_p, negate);
-	}
+	// public void toStringBufYicesList_oct(IndentedWriter iw, Variable[] vars, String suf_unp, String suf_p, boolean negate) {
+	// 	Collection<OctConstrLeqEq> col;
+	// 	col = octMat2OctConstrsLeqEq(vars);
+	// 	OctConstrLeqEq.toStringBufYicesList(iw, col, suf_unp, suf_p, negate);
+	// }
 
 	private boolean areInverse(Field f1, Field f2) {
 		if (!f1.isFinite() || !f2.isFinite())

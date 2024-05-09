@@ -411,7 +411,9 @@ public class BackEnd implements IAcceleration {
 	
 	public static boolean initActions() {
 		try {
-			CR.launchYices();
+			// TODO: remove
+			// CR.launchYices();
+			CR.initJavaSMT();
 			CR.launchGLPK();
 		} catch (UnsatisfiedLinkError e) {
 			return false;
@@ -419,8 +421,10 @@ public class BackEnd implements IAcceleration {
 		
 		return true;
 	}
+
+	// TODO: remove
 	public static void finalActions() {
-		CR.terminateYices();
+		// CR.terminateYices();
 	}
 	
 	// main method for testing purposes

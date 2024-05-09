@@ -12,16 +12,20 @@ public class Calculator {
 		initActions(true);
 	}
 	protected static void initActions(boolean glpk) {
-		CR.launchYices();
+		// CR.launchYices();
+		CR.initJavaSMT();
+		
 		if (glpk)
 			CR.launchGLPK();
 		
 		Parameters.initActions();
 	}
-	protected static void finalActions() {
-		CR.terminateYices();
-		//Parameters.finalActions();
-	}
+
+	// TODO: remove comments
+	// protected static void finalActions() {
+	// 	CR.terminateYices();
+	// 	//Parameters.finalActions();
+	// }
 	
 	
 	public static void main(String[] args) {
@@ -31,7 +35,7 @@ public class Calculator {
 		VariablePool pool = VariablePool.createEmptyPoolNoDeclar();
 		verimag.flata.parsers.MParser.calc(new File(args[0]), null, pool);
 		
-		finalActions();
+		// finalActions();
 	}
 	
 }

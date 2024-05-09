@@ -23,6 +23,6 @@ public class Termination {
 		cg.termination2();
 		//cg.termination();
 		
-		Calculator.finalActions();
+		// Calculator.finalActions();
 	}
 }
