@@ -27,7 +27,7 @@ public class Main {
 	private static PrintStream out;
 	private static long time_start;
 	public static void finalActions() {
-		CR.terminateYices();
+		// CR.terminateYices();
 		
 		Parameters.finalActions();
 		
@@ -312,7 +312,7 @@ public class Main {
 		
 		Main.finalActions();
 
-		// System.out.println(CR.solver.getSolverCalls() + ", " + CR.yices_calls);
+		System.out.println(CR.solver.getSolverCalls() + ", " + CR.yices_calls);
 
 		System.exit(0);
 	}

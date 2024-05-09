@@ -6,11 +6,13 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.common.log.BasicLogManager;
 
 import org.sosy_lab.java_smt.api.*;
+import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
+
+import com.google.common.collect.ImmutableList;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -29,6 +31,9 @@ public class JavaSMTSolver {
     private BooleanFormulaManager bfm;
     private QuantifiedFormulaManager qfm;
 
+    private ImmutableList<Model.ValueAssignment> modelAssignments;
+
+    // TODO: remove this (maybe)
     private int solverCalls;
 
     // TODO: Add options for smt solving
@@ -37,7 +42,7 @@ public class JavaSMTSolver {
             config = Configuration.defaultConfiguration();
             notifier = ShutdownNotifier.createDummy();
             logger = BasicLogManager.create(config);
-            context = null;
+            // context = null;
             context = SolverContextFactory.createSolverContext(config, logger, notifier, Solvers.Z3);
             ifm = context.getFormulaManager().getIntegerFormulaManager();
             bfm = context.getFormulaManager().getBooleanFormulaManager();
@@ -46,7 +51,6 @@ public class JavaSMTSolver {
             solverCalls = 0;
         } catch (Exception e) {
             e.printStackTrace();
-            // Handle other exceptions if necessary
         }
     }
 
@@ -66,19 +70,40 @@ public class JavaSMTSolver {
         return qfm;
     }
 
+    public ImmutableList<ValueAssignment> getModelAssignments() {
+        return modelAssignments;
+    }
+
     public int getSolverCalls() {
         return solverCalls;
     }
 
-    public Boolean isSatisfiable (BooleanFormula constraints) {
+    public Answer isSatisfiable (BooleanFormula formula) {
+        return isSatisfiable(formula, false, false);
+    }
+
+    public Answer isSatisfiable (BooleanFormula formula, Boolean invert) {
+        return isSatisfiable(formula, invert, false);
+    }
+
+    public Answer isSatisfiable (BooleanFormula formula, Boolean invert, Boolean generateModel) {
         solverCalls++;
         Boolean isSatisfiable = false;
-        try (ProverEnvironment prover = context.newProverEnvironment(ProverOptions.GENERATE_MODELS)) {
-            prover.addConstraint(constraints);
+        try (ProverEnvironment prover = generateModel ? context.newProverEnvironment(ProverOptions.GENERATE_MODELS) : context.newProverEnvironment()) {
+            prover.addConstraint(formula);
             isSatisfiable = !prover.isUnsat();
+            // No model exists when unsat, will throw exception if asked for
+            if (generateModel && isSatisfiable) {
+                modelAssignments = prover.getModelAssignments();
+            }
+            if (invert) {
+                return Answer.createAnswer(isSatisfiable).negate();
+            }
+            return Answer.createAnswer(isSatisfiable);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error in isSatisfiable: " + e.getMessage());
+            System.out.println("isSat: " + isSatisfiable);
+            return Answer.DONTKNOW;
         }
-        return isSatisfiable;
     }
 }

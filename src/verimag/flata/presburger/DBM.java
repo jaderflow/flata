@@ -1303,7 +1303,6 @@ public class DBM {
 			if (lt1 != null && lt2 != null) {
 				IntegerFormula constrLt1 = lt1.toJSMT(jsmt, s_u, s_p);
 				IntegerFormula constrLt2 = lt2.toJSMT(jsmt, s_u, s_p);
-
 				IntegerFormula addition = ifm.add(constrLt1, constrLt2);
 				if (isEq) {
 					if (negate) {
@@ -1395,6 +1394,13 @@ public class DBM {
 		return OctConstrLeqEq.toStringBuf(col);
 	}
 
+	public ArrayList<BooleanFormula> toJSMTList_dbc(JavaSMTSolver jsmt, Variable[] vars, String suf_unp, String suf_p, boolean negate) {
+		Collection<OctConstrLeqEq> col = dbMat2OctConstrsLeqEq(vars);
+
+		return OctConstrLeqEq.toJSMTList(jsmt, col, suf_unp, suf_p, negate);
+	}
+
+	// TODO: remove
 	public void toStringBufYicesList_dbc(IndentedWriter iw, String suf_unp, String suf_p, boolean negate, Variable[] varsOrig) {
 		Collection<OctConstrLeqEq> col;
 		col = dbMat2OctConstrsLeqEq(varsOrig);

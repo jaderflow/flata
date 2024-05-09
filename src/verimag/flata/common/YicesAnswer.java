@@ -3,6 +3,7 @@ package verimag.flata.common;
 /**
  * codes of Yices' answers
  */
+// TODO remove this file
 public enum YicesAnswer {
 	eYicesSAT, eYicesUNSAT, eYicesUknown;
 	public boolean isKnown() { return this==eYicesSAT || this==eYicesUNSAT; }

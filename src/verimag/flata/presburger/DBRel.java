@@ -1,11 +1,15 @@
 package verimag.flata.presburger;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+
+import org.sosy_lab.java_smt.api.BooleanFormula;
 
 import verimag.flata.acceleration.delta.DeltaClosure;
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 import verimag.flata.presburger.DBM.DetRes;
 
 public class DBRel extends Relation implements DBOct {
@@ -629,6 +633,17 @@ public class DBRel extends Relation implements DBOct {
 		return toStringBuf().toString();
 	}
 	
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String suf_unp, String suf_p) {
+		ArrayList<BooleanFormula> constraints = dbm.toJSMTList_dbc(jsmt, varsOrig, suf_unp, suf_p, false);
+
+		return jsmt.getBfm().and(constraints);
+	}
+
+	public ArrayList<BooleanFormula> toJSMTList(JavaSMTSolver jsmt, boolean negate) {
+		return dbm.toJSMTList_dbc(jsmt, varsOrig, null, null, negate);
+	}
+
+	// TODO: remove
 	public void toSBYicesAsConj(IndentedWriter aIW, String suf_unp, String suf_p) {
 		CR.yicesAndStart(aIW);
 		dbm.toStringBufYicesList_dbc(aIW, suf_unp, suf_p, false, varsOrig);

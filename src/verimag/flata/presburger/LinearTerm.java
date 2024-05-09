@@ -140,6 +140,7 @@ public class LinearTerm implements java.lang.Comparable<LinearTerm> {
 		return sb;
 	}
 
+	// TODO: fix suffix problem
 	public IntegerFormula toJSMT(JavaSMTSolver jsmt, String s_u, String s_p) {
 		IntegerFormulaManager ifm = jsmt.getIfm();
 
@@ -158,8 +159,8 @@ public class LinearTerm implements java.lang.Comparable<LinearTerm> {
 			}
 		}
 
-        if (variable != null) {
-            varName = "V_" + variable.name();
+        if (this.variable != null) {
+            // varName = variable.name(); // TODO: this is wrong
             IntegerFormula varFormula = ifm.makeVariable(varName);
             return ifm.multiply(coeffFormula, varFormula);
         } else {

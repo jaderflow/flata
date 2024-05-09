@@ -36,7 +36,7 @@
             "name": "Main",
             "request": "launch",
             "mainClass": "verimag.flata.Main",
-            "args": "-t-fullincl -t-merge-prec -acc-outgoing ./dist/synlifo.correct.nts",
+            "args": "-t-fullincl -t-merge-prec -acc-outgoing ./flataProvidedBenchmarks/benchmarks-reach/SIL/rotation_vc.error.1.nts",
             "projectName": "flata_2b8e279a"
         },
         {

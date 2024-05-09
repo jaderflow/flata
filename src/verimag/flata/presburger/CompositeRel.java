@@ -1588,11 +1588,11 @@ public class CompositeRel extends RelationCommon implements Label {
 		return false;
 	}
 
-	BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt) {
 		return toJSMTAsConj(jsmt, null, null);
 	}
 
-	BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
+	public BooleanFormula toJSMTAsConj(JavaSMTSolver jsmt, String s_u, String s_p) {
 		ArrayList<BooleanFormula> constraints = new ArrayList<>();
 
 		for (Relation r : this.rels) {
@@ -1934,7 +1934,7 @@ public class CompositeRel extends RelationCommon implements Label {
 
 		BooleanFormula formula = bfm.and(constraints);
 
-		return Answer.createInvertedAnswer(jsmt.isSatisfiable(formula));
+		return jsmt.isSatisfiable(formula, true);
 	}
 	
 	public static Answer subsumedOLD(Collection<String> vars, CompositeRel r, Collection<CompositeRel> rels) {

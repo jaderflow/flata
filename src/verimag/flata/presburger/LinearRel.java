@@ -2420,7 +2420,7 @@ new_lr = LinearRel.substituteConstants(aLR);
 		constraints1.add(orConstraint);
         BooleanFormula constraints = bfm.and(constraints1);
 
-		return Answer.createInvertedAnswer(CR.solver.isSatisfiable(constraints));
+		return jsmt.isSatisfiable(constraints, true);
 	}
 
 	private Answer includes_yices(LinearRel other) {
@@ -2537,10 +2537,9 @@ new_lr = LinearRel.substituteConstants(aLR);
 			
 			// StringBuffer yc = new StringBuffer(); // TODO: remove this
 
-			Boolean isSat = CR.solver.isSatisfiable(this.toJSMTFull());
+			Answer a = CR.solver.isSatisfiable(this.toJSMTFull());
 
 			// Answer a = Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc)); // TODO: remove this
-			Answer a = Answer.createAnswer(isSat);
 
 			if (a.isFalse())
 				this.simpleContradiction = true;

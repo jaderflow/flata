@@ -9,6 +9,11 @@ import java.io.StringReader;
 import java.util.*;
 
 import org.gnu.glpk.GLPK;
+import org.sosy_lab.java_smt.api.Model;
+import org.sosy_lab.java_smt.api.Model.ValueAssignment;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
+
+import com.google.common.collect.ImmutableList;
 
 import verimag.flata.presburger.Variable;
 import yices.*;
@@ -18,6 +23,7 @@ import yices.*;
  * members.
  */
 public class CR {
+	// TODO: consider renaming this 
 	public static JavaSMTSolver solver;
 
 	public static boolean RELEASE = true;
@@ -26,6 +32,7 @@ public class CR {
 	
 	public static String TRANS_ID_NAME = "id";
 	
+	//TODO: remove
 	private static boolean yicesLite = false;
 	
 	public static String yicesCommand;
@@ -194,7 +201,7 @@ public class CR {
 			while (CR.yicesStdoutReader.ready()) {
 				aYicesCore.append(CR.yicesStdoutReader.readLine()+CR.NEWLINE);
 			}
-			
+
 		} catch (IOException e) {
 			System.err.println("Problems when reading from Yices standard output.");
 			e.printStackTrace();
@@ -321,16 +328,16 @@ public class CR {
 				CR.yicesStdinWriter.write(tmp);
 				CR.yicesStdinWriter.flush();
 
-				// try {
-				// 	throw new RuntimeException();
-				// } catch (Exception e) {
-				// 	System.out.println("yices call #:" + yices_calls); // Assuming yices_calls is defined and updated elsewhere
-				// 	java.io.PrintWriter pw = new java.io.PrintWriter(System.out);
-				// 	System.out.println("expression:\n" + tmp);
-				// 	e.printStackTrace(pw);
-				// 	pw.flush();
-				// 	System.out.println();
-				// }
+				try {
+					throw new RuntimeException();
+				} catch (Exception e) {
+					System.out.println("yices call #:" + yices_calls); // Assuming yices_calls is defined and updated elsewhere
+					System.out.println("Formula YICES : \n" + tmp);
+					java.io.PrintWriter pw = new java.io.PrintWriter(System.out);
+					e.printStackTrace(pw);
+					pw.flush();
+					System.out.println();
+				}
 			}
 			
 			long t2 = System.currentTimeMillis();
@@ -351,7 +358,18 @@ public class CR {
 			return null;
 		}
 	}
+
+	public static Map<String, String> parseProverModelAssignments(ImmutableList<ValueAssignment> modelAssignments){
+		Map<String, String> coreValues = new HashMap<String, String>();
+		
+		for (ValueAssignment va : modelAssignments) {
+			coreValues.put(va.getKey().toString(), va.getValue().toString());
+		}
+
+		return coreValues;
+	}
 	
+	// TODO: convert this to use javasmt getmodel etc...
 	public static Map<String, String> parseYicesCore(StringBuffer yicesCore) {
 		Map<String, String> coreValues = new HashMap<String, String>();
 	

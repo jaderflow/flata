@@ -531,7 +531,7 @@ public class DisjRel {
 			// not (formula1 => formula2)
 			BooleanFormula notImplication = bfm.not(implication);
 
-			return Answer.createInvertedAnswer(CR.solver.isSatisfiable(notImplication)); // TODO: check if this is correct
+			return jsmt.isSatisfiable(notImplication, true); // TODO: check if this is correct
 		}
 	}
 

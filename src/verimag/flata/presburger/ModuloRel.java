@@ -791,7 +791,7 @@ public class ModuloRel extends Relation {
 			BooleanFormula orConstr = bfm.or(thisConstrs);
 			BooleanFormula andConstr = bfm.and(otherConstrs);
 
-			return Answer.createInvertedAnswer(CR.solver.isSatisfiable(bfm.and(andConstr, orConstr)));
+			return CR.solver.isSatisfiable(bfm.and(andConstr, orConstr), true);
 		}
 	}
 
@@ -922,7 +922,7 @@ public class ModuloRel extends Relation {
 		
 		// StringBuffer yc = new StringBuffer(); // TODO: remove this
 
-		return Answer.createAnswer(CR.solver.isSatisfiable(this.toJSMTFull()));
+		return CR.solver.isSatisfiable(this.toJSMTFull());
 
 		// return Answer.createFromYicesSat(CR.isSatisfiableYices(this.toSBYicesFull(), yc)); // TODO: remove this
 	}

@@ -3,10 +3,13 @@ package verimag.flata.automata.ca;
 import java.io.StringWriter;
 import java.util.*;
 
+import org.sosy_lab.java_smt.api.BooleanFormula;
+
 import verimag.flata.automata.*;
 import verimag.flata.common.Answer;
 import verimag.flata.common.CR;
 import verimag.flata.common.IndentedWriter;
+import verimag.flata.common.JavaSMTSolver;
 import verimag.flata.common.Label;
 import verimag.flata.common.Parameters;
 import verimag.flata.common.YicesAnswer;
@@ -944,57 +947,69 @@ public class CATransition extends BaseArc implements java.lang.Comparable<CATran
 		return ret;
 	}
 	
-	
 	public static Answer inclusionCheck(Collection<CATransition> tOld, CATransition tNew) {
-
-		if (tOld.size() == 0)
-			return Answer.createAnswer(false);
 		
-		StringWriter sw = new StringWriter();
-		IndentedWriter iw = new IndentedWriter(sw);
+		if (tOld.size() == 0)
+		return Answer.createAnswer(false);
+		
+		// TODO: remove comments
+		// StringWriter sw = new StringWriter();
+		// IndentedWriter iw = new IndentedWriter(sw);
 
-		iw.writeln("(reset)");
+		// iw.writeln("(reset)");
 
 		// define
-		Set<Variable> vars = new HashSet<Variable>();
-		tNew.labAsRel().refVars(vars);
-		for (CATransition t : tOld) {
-			t.labAsRel().refVars(vars);
-		}
-		CR.yicesDefineVars(iw, vars);
+		// Set<Variable> vars = new HashSet<Variable>();
+		// tNew.labAsRel().refVars(vars);
+		// for (CATransition t : tOld) {
+		// 	t.labAsRel().refVars(vars);
+		// }
+		// CR.yicesDefineVars(iw, vars);
 
-		iw.writeln("(assert");
-		iw.indentInc();
+		// iw.writeln("(assert");
+		// iw.indentInc();
 		
-		iw.writeln("(and");
-		iw.indentInc();
+		// iw.writeln("(and");
+		// iw.indentInc();
 		
+		JavaSMTSolver jsmt = CR.solver;
+
 		LinearRel lrnew = tNew.labAsRel().toLinearRel();
-		lrnew.toSBYicesAsConj(iw);
+		BooleanFormula formula1 = lrnew.toJSMTAsConj(jsmt);
+		// lrnew.toSBYicesAsConj(iw);
 		
-		iw.writeln("(not (or");
-		iw.indentInc();
+		// iw.writeln("(not (or");
+		// iw.indentInc();
+
+		ArrayList<BooleanFormula> formulas = new ArrayList<>();
 		
 		for (CATransition t : tOld) {
 			LinearRel lr = t.labAsRel().toLinearRel();
-			lr.toSBYicesAsConj(iw);
+			formulas.add(lr.toJSMTAsConj(jsmt));
+			// lr.toSBYicesAsConj(iw);
 		}
 		
-		iw.writeln("))"); // not or
-		iw.indentDec();
+		BooleanFormula formula2 = jsmt.getBfm().not(jsmt.getBfm().or(formulas));
+
+		BooleanFormula formula = jsmt.getBfm().and(formula1, formula2);
+
+		// iw.writeln("))"); // not or
+		// iw.indentDec();
 		
-		iw.writeln(")"); // and
-		iw.indentDec();
+		// iw.writeln(")"); // and
+		// iw.indentDec();
 		
-		iw.indentDec();
-		iw.writeln(")"); // assert
+		// iw.indentDec();
+		// iw.writeln(")"); // assert
 
-		iw.writeln("(check)");
+		// iw.writeln("(check)");
 
-		StringBuffer yc = new StringBuffer();
-		YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
+		// StringBuffer yc = new StringBuffer();
+		// YicesAnswer ya = CR.isSatisfiableYices(sw.getBuffer(), yc);
 
-		return Answer.createFromYicesUnsat(ya);
+		// return Answer.createFromYicesUnsat(ya);
+
+		return jsmt.isSatisfiable(formula, true);
 	}
 
 	// split to more accelerable transitions 

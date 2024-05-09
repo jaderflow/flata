@@ -17,12 +17,6 @@ public enum Answer {
 		else
 			return FALSE;
 	}
-	public static Answer createInvertedAnswer(boolean b) {
-		if (b)
-			return FALSE;
-		else
-			return TRUE;
-	} 
 	public Answer and(Answer other) {
 		if (this == TRUE && other == TRUE)
 			return TRUE;
@@ -37,6 +31,7 @@ public enum Answer {
 			return FALSE;
 		return DONTKNOW;
 	}
+	// TODO: remove these
 	public static Answer createFromYicesSat(YicesAnswer satisfiableYices) {
 		switch(satisfiableYices) {
 		case eYicesSAT: return Answer.TRUE;
